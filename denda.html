@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Athenaeum Library | Denda</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  body { min-height: max(884px, 100dvh); }
+  #pay-modal { display:none; }
+  #pay-modal.show { display:flex; }
+</style>
+<script>
+  tailwind.config = {
+    darkMode:"class",
+    theme:{extend:{colors:{"on-secondary-container":"#006f64","secondary-container":"#6df5e1","primary":"#00236f","surface-container-lowest":"#ffffff","on-background":"#191c1e","surface":"#f7f9fb","surface-container-highest":"#e0e3e5","on-surface":"#191c1e","error":"#ba1a1a","background":"#f7f9fb","surface-container-high":"#e6e8ea","on-primary-container":"#90a8ff","secondary":"#006b5f","on-primary":"#ffffff","outline":"#757682","on-error-container":"#93000a","surface-container":"#eceef0","on-surface-variant":"#444651","on-error":"#ffffff","primary-container":"#1e3a8a","error-container":"#ffdad6","primary-fixed":"#dce1ff","outline-variant":"#c5c5d3","surface-container-low":"#f2f4f6"},
+    spacing:{xs:"4px","container-max":"1280px",gutter:"24px",lg:"24px",base:"4px",sm:"8px",xl:"40px",md:"16px"},
+    fontFamily:{"body-sm":["Inter"],"headline-md":["Plus Jakarta Sans"],"label-sm":["Inter"],"body-md":["Inter"],"label-md":["Inter"],"headline-lg":["Plus Jakarta Sans"]},
+    fontSize:{"body-sm":["14px",{lineHeight:"20px",fontWeight:"400"}],"headline-md":["24px",{lineHeight:"32px",fontWeight:"600"}],"label-sm":["12px",{lineHeight:"16px",fontWeight:"600"}],"body-md":["16px",{lineHeight:"24px",fontWeight:"400"}],"label-md":["14px",{lineHeight:"20px",letterSpacing:"0.01em",fontWeight:"500"}],"headline-lg":["32px",{lineHeight:"40px",letterSpacing:"-0.01em",fontWeight:"600"}]}}}
+  }
+</script>
+</head>
+<body class="bg-surface text-on-surface font-body-md">
+
+<header class="bg-surface shadow-sm fixed top-0 w-full z-30">
+  <div class="flex justify-between items-center w-full px-lg max-w-container-max mx-auto h-16">
+    <div class="flex items-center gap-md">
+      <a href="katalog.html" class="material-symbols-outlined text-primary hover:bg-surface-container p-1 rounded-lg transition-colors">arrow_back</a>
+      <h1 class="font-headline-md text-headline-md font-bold text-primary">Denda Saya</h1>
+    </div>
+    <nav class="hidden md:flex gap-xl items-center">
+      <a class="text-on-surface-variant hover:text-primary transition-colors" href="katalog.html">Dashboard</a>
+      <a class="text-on-surface-variant hover:text-primary transition-colors" href="katalog.html">Catalog</a>
+      <a class="text-on-surface-variant hover:text-primary transition-colors" href="profil.html">Profile</a>
+    </nav>
+    <a href="index.html" class="material-symbols-outlined text-on-surface-variant hover:text-error transition-colors">logout</a>
+  </div>
+</header>
+
+<main class="pt-24 pb-20 px-4 md:px-lg max-w-container-max mx-auto">
+
+  <!-- Summary Card -->
+  <div class="bg-error-container border border-error/20 rounded-2xl p-lg mb-xl flex flex-col md:flex-row items-center md:items-start justify-between gap-lg">
+    <div class="flex items-center gap-md">
+      <div class="w-14 h-14 rounded-full bg-error/10 flex items-center justify-center">
+        <span class="material-symbols-outlined text-error text-[32px]">payments</span>
+      </div>
+      <div>
+        <p class="font-label-md text-on-error-container">Total Denda Aktif</p>
+        <h2 class="font-headline-lg text-headline-lg text-error" id="total-denda">Rp 12.500</h2>
+        <p class="font-body-sm text-on-error-container/70">1 item overdue · Denda Rp 1.000/hari</p>
+      </div>
+    </div>
+    <button onclick="openPayModal()" class="flex items-center gap-sm bg-error text-white px-lg py-md rounded-lg font-label-md hover:bg-error/90 active:scale-95 transition-all shadow-md">
+      <span class="material-symbols-outlined text-[18px]">credit_card</span> Bayar Sekarang
+    </button>
+  </div>
+
+  <!-- Denda Aktif -->
+  <h3 class="font-headline-md text-headline-md text-on-surface mb-md">Denda Aktif</h3>
+  <div class="space-y-md mb-xl" id="denda-aktif">
+    <div class="bg-surface-container-lowest border border-error/30 rounded-xl p-md shadow-sm flex items-start gap-md">
+      <img src="https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=80" alt="Sapiens" class="w-14 h-20 object-cover rounded-lg flex-shrink-0"/>
+      <div class="flex-1">
+        <div class="flex justify-between items-start">
+          <div>
+            <h4 class="font-body-md font-bold text-on-surface">Sapiens: A Brief History</h4>
+            <p class="font-body-sm text-on-surface-variant">Yuval Noah Harari</p>
+          </div>
+          <span class="bg-error-container text-on-error-container px-sm py-xs rounded-full font-label-sm">Overdue</span>
+        </div>
+        <div class="mt-sm grid grid-cols-2 gap-sm text-label-sm text-on-surface-variant">
+          <span><span class="material-symbols-outlined text-[14px]">calendar_today</span> Pinjam: 10 Okt 2024</span>
+          <span><span class="material-symbols-outlined text-[14px]">event_busy</span> Jatuh tempo: 24 Okt 2024</span>
+          <span class="text-error font-bold"><span class="material-symbols-outlined text-[14px]">schedule</span> Terlambat: 12 hari</span>
+          <span class="text-error font-bold"><span class="material-symbols-outlined text-[14px]">payments</span> Denda: Rp 12.000</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Riwayat Denda -->
+  <h3 class="font-headline-md text-headline-md text-on-surface mb-md">Riwayat Pembayaran</h3>
+  <div class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+    <table class="w-full text-left">
+      <thead>
+        <tr class="bg-surface-container-low border-b border-outline-variant">
+          <th class="px-lg py-md font-label-sm text-on-surface-variant uppercase tracking-wider">Buku</th>
+          <th class="px-lg py-md font-label-sm text-on-surface-variant uppercase tracking-wider hidden md:table-cell">Tgl Bayar</th>
+          <th class="px-lg py-md font-label-sm text-on-surface-variant uppercase tracking-wider">Jumlah</th>
+          <th class="px-lg py-md font-label-sm text-on-surface-variant uppercase tracking-wider hidden md:table-cell">Status</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-outline-variant">
+        <tr class="hover:bg-surface-container transition-colors">
+          <td class="px-lg py-md font-body-md text-on-surface">Clean Code</td>
+          <td class="px-lg py-md font-body-md text-on-surface-variant hidden md:table-cell">05 Okt 2024</td>
+          <td class="px-lg py-md font-body-md text-on-surface font-bold">Rp 3.000</td>
+          <td class="px-lg py-md hidden md:table-cell"><span class="bg-secondary-container text-on-secondary-container px-sm py-xs rounded-full font-label-sm">Lunas</span></td>
+        </tr>
+        <tr class="hover:bg-surface-container transition-colors">
+          <td class="px-lg py-md font-body-md text-on-surface">Dune</td>
+          <td class="px-lg py-md font-body-md text-on-surface-variant hidden md:table-cell">28 Ags 2024</td>
+          <td class="px-lg py-md font-body-md text-on-surface font-bold">Rp 5.000</td>
+          <td class="px-lg py-md hidden md:table-cell"><span class="bg-secondary-container text-on-secondary-container px-sm py-xs rounded-full font-label-sm">Lunas</span></td>
+        </tr>
+        <tr class="hover:bg-surface-container transition-colors">
+          <td class="px-lg py-md font-body-md text-on-surface">The Alchemist</td>
+          <td class="px-lg py-md font-body-md text-on-surface-variant hidden md:table-cell">10 Jul 2024</td>
+          <td class="px-lg py-md font-body-md text-on-surface font-bold">Rp 2.000</td>
+          <td class="px-lg py-md hidden md:table-cell"><span class="bg-secondary-container text-on-secondary-container px-sm py-xs rounded-full font-label-sm">Lunas</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</main>
+
+<!-- MODAL BAYAR -->
+<div id="pay-modal" class="fixed inset-0 z-50 bg-black/50 items-center justify-center px-4">
+  <div class="bg-surface-container-lowest rounded-2xl w-full max-w-md shadow-xl p-lg">
+    <div class="flex justify-between items-center mb-md">
+      <h3 class="font-headline-md text-headline-md text-on-surface">Konfirmasi Pembayaran</h3>
+      <button onclick="closePayModal()" class="material-symbols-outlined text-on-surface-variant hover:text-error">close</button>
+    </div>
+    <div class="bg-surface-container p-md rounded-xl mb-md space-y-sm">
+      <div class="flex justify-between font-body-sm">
+        <span class="text-on-surface-variant">Denda Sapiens</span>
+        <span class="font-bold">Rp 12.000</span>
+      </div>
+      <div class="flex justify-between font-body-sm">
+        <span class="text-on-surface-variant">Biaya Admin</span>
+        <span class="font-bold">Rp 500</span>
+      </div>
+      <div class="border-t border-outline-variant pt-sm flex justify-between font-body-md">
+        <span class="font-bold text-on-surface">Total</span>
+        <span class="font-bold text-error">Rp 12.500</span>
+      </div>
+    </div>
+    <div class="mb-md">
+      <label class="font-label-md text-on-surface-variant block mb-xs">Metode Pembayaran</label>
+      <select class="w-full border border-outline-variant rounded-lg py-2 px-md bg-white focus:ring-1 focus:ring-primary">
+        <option>Transfer Bank</option>
+        <option>QRIS</option>
+        <option>Tunai di Kasir</option>
+      </select>
+    </div>
+    <div class="flex gap-sm">
+      <button onclick="closePayModal()" class="flex-1 border border-outline-variant text-on-surface-variant py-3 rounded-lg font-label-md hover:bg-surface-container transition-colors">Batal</button>
+      <button onclick="confirmPay()" class="flex-1 bg-error text-white py-3 rounded-lg font-label-md hover:bg-error/90 active:scale-[0.98] transition-all">Bayar</button>
+    </div>
+  </div>
+</div>
+
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-30 flex justify-around items-center py-2 bg-surface border-t border-outline-variant">
+  <a class="flex flex-col items-center text-on-surface-variant" href="katalog.html">
+    <span class="material-symbols-outlined">dashboard</span><span class="font-label-sm text-[10px]">Dashboard</span>
+  </a>
+  <a class="flex flex-col items-center text-on-surface-variant" href="katalog.html">
+    <span class="material-symbols-outlined">auto_stories</span><span class="font-label-sm text-[10px]">Catalog</span>
+  </a>
+  <a class="flex flex-col items-center text-on-surface-variant" href="profil.html">
+    <span class="material-symbols-outlined">person</span><span class="font-label-sm text-[10px]">Profile</span>
+  </a>
+</nav>
+
+<script>
+  function openPayModal() { document.getElementById('pay-modal').classList.add('show'); }
+  function closePayModal() { document.getElementById('pay-modal').classList.remove('show'); }
+  function confirmPay() {
+    closePayModal();
+    document.getElementById('denda-aktif').innerHTML = '<div class="text-center py-xl"><span class="material-symbols-outlined text-[48px] text-secondary">check_circle</span><p class="text-on-surface font-bold mt-md">Pembayaran berhasil!</p><p class="text-on-surface-variant font-body-sm">Denda kamu sudah lunas.</p></div>';
+    document.getElementById('total-denda').textContent = 'Rp 0';
+  }
+</script>
+</body>
+</html>

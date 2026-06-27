@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Athenaeum Library | Laporan Admin</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  body { min-height: max(884px, 100dvh); font-family: 'Inter', sans-serif; background-color: #f7f9fb; }
+</style>
+<script>
+  tailwind.config = {
+    darkMode: "class",
+    theme: { extend: { colors: {
+      "primary":"#00236f","on-primary":"#ffffff","primary-container":"#1e3a8a","on-primary-container":"#90a8ff",
+      "primary-fixed":"#dce1ff","secondary":"#006b5f","secondary-container":"#6df5e1","on-secondary-container":"#006f64",
+      "surface":"#f7f9fb","on-surface":"#191c1e","surface-container-lowest":"#ffffff","surface-container-low":"#f2f4f6",
+      "surface-container":"#eceef0","surface-container-high":"#e6e8ea","surface-container-highest":"#e0e3e5",
+      "on-surface-variant":"#444651","outline":"#757682","outline-variant":"#c5c5d3",
+      "error":"#ba1a1a","on-error":"#ffffff","error-container":"#ffdad6","on-error-container":"#93000a"
+    }, spacing: { xs:"4px","container-max":"1280px",lg:"24px",sm:"8px",xl:"40px",md:"16px" },
+    fontFamily: { "body-sm":["Inter"],"body-md":["Inter"],"label-sm":["Inter"],"label-md":["Inter"],"headline-md":["Plus Jakarta Sans"],"headline-lg":["Plus Jakarta Sans"] },
+    fontSize: {
+      "body-sm":["14px",{lineHeight:"20px"}],"body-md":["16px",{lineHeight:"24px"}],
+      "label-sm":["12px",{lineHeight:"16px",fontWeight:"600"}],"label-md":["14px",{lineHeight:"20px",fontWeight:"500"}],
+      "headline-md":["24px",{lineHeight:"32px",fontWeight:"600"}],"headline-lg":["32px",{lineHeight:"40px",fontWeight:"600"}]
+    }}}
+  }
+</script>
+</head>
+<body class="bg-surface text-on-surface">
+
+<header class="bg-surface shadow-sm sticky top-0 z-40 h-16 flex justify-between items-center w-full px-lg max-w-container-max mx-auto">
+  <div class="flex items-center gap-md">
+    <a href="dashboard-admin.html" class="material-symbols-outlined text-primary hover:bg-surface-container p-1 rounded-lg transition-colors">arrow_back</a>
+    <h1 class="font-headline-md text-headline-md font-bold text-primary">Athenaeum Library</h1>
+  </div>
+  <span class="hidden md:block font-label-md text-on-surface-variant">Admin</span>
+  <a href="index.html" class="material-symbols-outlined text-on-surface-variant hover:text-error transition-colors" title="Logout">logout</a>
+</header>
+
+<div class="flex max-w-container-max mx-auto min-h-screen">
+  <aside class="hidden lg:flex flex-col h-full py-md w-64 bg-surface-container-low border-r border-outline-variant">
+    <div class="px-md mb-xl flex flex-col items-start">
+      <p class="font-body-md font-bold text-primary">Librarian Admin</p>
+      <p class="text-[10px] text-on-surface-variant uppercase tracking-wider mt-xs">Role: Admin</p>
+    </div>
+    <nav class="flex-1 space-y-2">
+      <a href="dashboard-admin.html" class="text-on-surface-variant hover:bg-surface-variant mx-2 px-md py-sm rounded-lg flex items-center gap-md transition-all">
+        <span class="material-symbols-outlined">dashboard</span><span class="font-body-md">Dashboard</span>
+      </a>
+      <a href="bookshelf-admin.html" class="text-on-surface-variant hover:bg-surface-variant mx-2 px-md py-sm rounded-lg flex items-center gap-md transition-all">
+        <span class="material-symbols-outlined">library_books</span><span class="font-body-md">Bookshelf</span>
+      </a>
+      <a href="transaksi-admin.html" class="text-on-surface-variant hover:bg-surface-variant mx-2 px-md py-sm rounded-lg flex items-center gap-md transition-all">
+        <span class="material-symbols-outlined">swap_horiz</span><span class="font-body-md">Transaksi</span>
+      </a>
+      <a href="anggota-admin.html" class="text-on-surface-variant hover:bg-surface-variant mx-2 px-md py-sm rounded-lg flex items-center gap-md transition-all">
+        <span class="material-symbols-outlined">group</span><span class="font-body-md">Anggota</span>
+      </a>
+      <div class="bg-primary-container text-on-primary-container mx-2 px-md py-sm rounded-lg flex items-center gap-md">
+        <span class="material-symbols-outlined">assessment</span><span class="font-body-md">Laporan</span>
+      </div>
+      <a href="settings-admin.html" class="text-on-surface-variant hover:bg-surface-variant mx-2 px-md py-sm rounded-lg flex items-center gap-md transition-all">
+        <span class="material-symbols-outlined">settings</span><span class="font-body-md">Pengaturan</span>
+      </a>
+    </nav>
+  </aside>
+
+  <main class="flex-1 px-lg py-xl overflow-x-hidden">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-xl gap-md">
+      <div>
+        <h2 class="font-headline-lg text-headline-lg text-on-surface">Laporan Transaksi</h2>
+        <p class="font-body-md text-on-surface-variant">Log lengkap seluruh aktivitas peminjaman perpustakaan.</p>
+      </div>
+      <button onclick="exportLaporan()" id="btn-export" class="flex items-center gap-sm bg-primary text-white px-lg py-sm rounded-lg font-label-md hover:opacity-90 active:scale-95 transition-all shadow-md">
+        <span class="material-symbols-outlined text-[18px]">download</span> Export CSV
+      </button>
+    </div>
+
+    <!-- Filter -->
+    <div class="flex flex-col md:flex-row gap-md mb-md">
+      <div class="relative flex-1">
+        <span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline">search</span>
+        <input id="search-input" oninput="renderLaporan()" type="text" placeholder="Cari nama atau judul buku..." class="w-full pl-12 pr-md py-3 border border-outline-variant rounded-xl bg-surface-container-lowest focus:ring-2 focus:ring-primary focus:border-transparent transition-all"/>
+      </div>
+      <select id="filter-status" onchange="renderLaporan()" class="border border-outline-variant rounded-xl py-3 px-md bg-white focus:ring-1 focus:ring-primary font-body-md">
+        <option value="Semua">Semua Status</option>
+        <option value="Borrowed">Dipinjam</option>
+        <option value="Returned">Dikembalikan</option>
+        <option value="Overdue">Overdue</option>
+      </select>
+      <select id="filter-bulan" onchange="renderLaporan()" class="border border-outline-variant rounded-xl py-3 px-md bg-white focus:ring-1 focus:ring-primary font-body-md">
+        <option value="Semua">Semua Bulan</option>
+        <option value="Oktober">Oktober 2024</option>
+        <option value="September">September 2024</option>
+        <option value="Agustus">Agustus 2024</option>
+      </select>
+    </div>
+
+    <p id="info-jumlah" class="font-body-sm text-on-surface-variant mb-md"></p>
+
+    <div class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left">
+          <thead>
+            <tr class="bg-surface-container-low text-outline text-label-sm uppercase tracking-wider border-b border-outline-variant">
+              <th class="px-lg py-md font-medium">ID</th>
+              <th class="px-lg py-md font-medium">Anggota</th>
+              <th class="px-lg py-md font-medium">Judul Buku</th>
+              <th class="px-lg py-md font-medium hidden md:table-cell">Tgl Pinjam</th>
+              <th class="px-lg py-md font-medium hidden md:table-cell">Tgl Kembali</th>
+              <th class="px-lg py-md font-medium">Status</th>
+              <th class="px-lg py-md font-medium hidden md:table-cell">Denda</th>
+            </tr>
+          </thead>
+          <tbody id="tabel-laporan" class="divide-y divide-outline-variant"></tbody>
+        </table>
+      </div>
+      <div id="kosong" class="hidden text-center py-xl">
+        <span class="material-symbols-outlined text-[48px] text-outline">search_off</span>
+        <p class="text-on-surface-variant font-body-md mt-md">Tidak ada data ditemukan.</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<nav class="lg:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center py-2 bg-surface shadow-lg border-t border-outline-variant">
+  <a href="dashboard-admin.html" class="flex flex-col items-center text-on-surface-variant">
+    <span class="material-symbols-outlined">dashboard</span><span class="font-label-sm text-[10px]">Dashboard</span>
+  </a>
+  <a href="transaksi-admin.html" class="flex flex-col items-center text-on-surface-variant">
+    <span class="material-symbols-outlined">swap_horiz</span><span class="font-label-sm text-[10px]">Transaksi</span>
+  </a>
+  <a href="reports-admin.html" class="flex flex-col items-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1">
+    <span class="material-symbols-outlined">assessment</span><span class="font-label-sm text-[10px]">Laporan</span>
+  </a>
+  <a href="settings-admin.html" class="flex flex-col items-center text-on-surface-variant">
+    <span class="material-symbols-outlined">settings</span><span class="font-label-sm text-[10px]">Pengaturan</span>
+  </a>
+</nav>
+
+<script>
+const dataLaporan = [
+  { id:'TX001', nama:'Jane Doe', idA:'#10293', buku:'The Great Gatsby', tglPinjam:'15 Okt 2024', tglKembali:'29 Okt 2024', bulan:'Oktober', status:'Borrowed', denda:'Rp 0' },
+  { id:'TX002', nama:'Mark Smith', idA:'#10344', buku:'Digital Minimalism', tglPinjam:'14 Okt 2024', tglKembali:'28 Okt 2024', bulan:'Oktober', status:'Returned', denda:'Rp 0' },
+  { id:'TX003', nama:'Alice Wong', idA:'#10592', buku:'Brave New World', tglPinjam:'10 Okt 2024', tglKembali:'24 Okt 2024', bulan:'Oktober', status:'Overdue', denda:'Rp 5.000' },
+  { id:'TX004', nama:'Ahmad Dahlan', idA:'#20145', buku:'The Alchemist', tglPinjam:'12 Okt 2024', tglKembali:'26 Okt 2024', bulan:'Oktober', status:'Returned', denda:'Rp 0' },
+  { id:'TX005', nama:'Sarah Johnson', idA:'#20201', buku:'Introduction to Algorithms', tglPinjam:'11 Okt 2024', tglKembali:'25 Okt 2024', bulan:'Oktober', status:'Borrowed', denda:'Rp 0' },
+  { id:'TX006', nama:'Budi Santoso', idA:'#20388', buku:'Atomic Habits', tglPinjam:'10 Okt 2024', tglKembali:'24 Okt 2024', bulan:'Oktober', status:'Overdue', denda:'Rp 2.000' },
+  { id:'TX007', nama:'Dewi Ningsih', idA:'#20412', buku:'Sapiens', tglPinjam:'18 Sep 2024', tglKembali:'02 Okt 2024', bulan:'September', status:'Returned', denda:'Rp 0' },
+  { id:'TX008', nama:'Maya Ratih', idA:'#20537', buku:'Clean Code', tglPinjam:'01 Sep 2024', tglKembali:'15 Sep 2024', bulan:'September', status:'Returned', denda:'Rp 3.000' },
+  { id:'TX009', nama:'Rizky Pratama', idA:'#20618', buku:'Dune', tglPinjam:'10 Ags 2024', tglKembali:'24 Ags 2024', bulan:'Agustus', status:'Returned', denda:'Rp 0' },
+];
+
+const warnaSts = { 'Borrowed':'text-primary', 'Returned':'text-secondary', 'Overdue':'text-error' };
+const dotSts = { 'Borrowed':'bg-primary', 'Returned':'bg-secondary', 'Overdue':'bg-error' };
+const labelSts = { 'Borrowed':'Dipinjam', 'Returned':'Dikembalikan', 'Overdue':'Overdue' };
+
+function renderLaporan() {
+  const q = document.getElementById('search-input').value.toLowerCase();
+  const sts = document.getElementById('filter-status').value;
+  const bln = document.getElementById('filter-bulan').value;
+  let hasil = dataLaporan.filter(t =>
+    (!q || t.nama.toLowerCase().includes(q) || t.buku.toLowerCase().includes(q))
+    && (sts === 'Semua' || t.status === sts)
+    && (bln === 'Semua' || t.bulan === bln)
+  );
+  document.getElementById('info-jumlah').textContent = `Menampilkan ${hasil.length} dari ${dataLaporan.length} transaksi`;
+  const tbody = document.getElementById('tabel-laporan');
+  tbody.innerHTML = '';
+  if (!hasil.length) { document.getElementById('kosong').classList.remove('hidden'); return; }
+  document.getElementById('kosong').classList.add('hidden');
+  hasil.forEach(t => {
+    tbody.insertAdjacentHTML('beforeend', `
+      <tr class="hover:bg-surface-container-low transition-colors">
+        <td class="px-lg py-md font-label-sm text-outline">${t.id}</td>
+        <td class="px-lg py-md">
+          <p class="font-body-md font-semibold text-on-surface">${t.nama}</p>
+          <p class="text-[11px] text-on-surface-variant">${t.idA}</p>
+        </td>
+        <td class="px-lg py-md font-body-md text-on-surface">${t.buku}</td>
+        <td class="px-lg py-md font-body-md text-outline hidden md:table-cell">${t.tglPinjam}</td>
+        <td class="px-lg py-md font-body-md text-outline hidden md:table-cell">${t.tglKembali}</td>
+        <td class="px-lg py-md">
+          <span class="flex items-center gap-xs">
+            <div class="w-2 h-2 rounded-full ${dotSts[t.status]}"></div>
+            <span class="font-label-sm font-semibold ${warnaSts[t.status]}">${labelSts[t.status]}</span>
+          </span>
+        </td>
+        <td class="px-lg py-md font-body-md hidden md:table-cell ${t.denda !== 'Rp 0' ? 'text-error font-bold' : 'text-on-surface'}">${t.denda}</td>
+      </tr>
+    `);
+  });
+}
+
+function exportLaporan() {
+  const btn = document.getElementById('btn-export');
+  const ori = btn.innerHTML;
+  btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">sync</span> Mengekspor...';
+  btn.disabled = true;
+  setTimeout(() => {
+    const q = document.getElementById('search-input').value.toLowerCase();
+    const sts = document.getElementById('filter-status').value;
+    const bln = document.getElementById('filter-bulan').value;
+    let hasil = dataLaporan.filter(t =>
+      (!q || t.nama.toLowerCase().includes(q) || t.buku.toLowerCase().includes(q))
+      && (sts === 'Semua' || t.status === sts)
+      && (bln === 'Semua' || t.bulan === bln)
+    );
+    const baris = ['ID,Nama Anggota,ID Anggota,Judul Buku,Tgl Pinjam,Tgl Kembali,Status,Denda'];
+    hasil.forEach(t => baris.push(`${t.id},${t.nama},${t.idA},${t.buku},${t.tglPinjam},${t.tglKembali},${labelSts[t.status]},${t.denda}`));
+    const blob = new Blob([baris.join('\n')], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'laporan-transaksi.csv'; a.click();
+    URL.revokeObjectURL(url);
+    btn.innerHTML = ori;
+    btn.disabled = false;
+    tampilToast('Laporan berhasil diekspor!');
+  }, 1000);
+}
+
+function tampilToast(msg) {
+  const t = document.createElement('div');
+  t.style.cssText = 'position:fixed;bottom:88px;left:50%;transform:translateX(-50%);background:#191c1e;color:#eff1f3;padding:10px 20px;border-radius:999px;z-index:99;font-size:14px;display:flex;align-items:center;gap:8px;white-space:nowrap;';
+  t.innerHTML = `<span class="material-symbols-outlined" style="font-size:16px;color:#6df5e1">check_circle</span>${msg}`;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+renderLaporan();
+</script>
+</body>
+</html>

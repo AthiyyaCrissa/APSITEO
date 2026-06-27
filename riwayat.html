@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Athenaeum Library | Riwayat Pinjam</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  body { min-height: max(884px, 100dvh); }
+</style>
+<script>
+  tailwind.config = {
+    darkMode:"class",
+    theme:{extend:{colors:{"on-secondary-container":"#006f64","secondary-container":"#6df5e1","primary":"#00236f","surface-container-lowest":"#ffffff","on-background":"#191c1e","surface":"#f7f9fb","surface-container-highest":"#e0e3e5","on-secondary":"#ffffff","on-surface":"#191c1e","error":"#ba1a1a","background":"#f7f9fb","surface-container-high":"#e6e8ea","on-primary-container":"#90a8ff","secondary":"#006b5f","on-primary":"#ffffff","outline":"#757682","on-error-container":"#93000a","surface-container":"#eceef0","on-surface-variant":"#444651","on-error":"#ffffff","primary-container":"#1e3a8a","error-container":"#ffdad6","primary-fixed":"#dce1ff","outline-variant":"#c5c5d3","surface-container-low":"#f2f4f6","tertiary-fixed":"#e2dfff","tertiary":"#190093"},
+    spacing:{xs:"4px","container-max":"1280px",gutter:"24px",lg:"24px",base:"4px",sm:"8px",xl:"40px",md:"16px"},
+    fontFamily:{"body-sm":["Inter"],"headline-md":["Plus Jakarta Sans"],"label-sm":["Inter"],"body-md":["Inter"],"label-md":["Inter"],"headline-lg":["Plus Jakarta Sans"]},
+    fontSize:{"body-sm":["14px",{lineHeight:"20px",fontWeight:"400"}],"headline-md":["24px",{lineHeight:"32px",fontWeight:"600"}],"label-sm":["12px",{lineHeight:"16px",fontWeight:"600"}],"body-md":["16px",{lineHeight:"24px",fontWeight:"400"}],"label-md":["14px",{lineHeight:"20px",letterSpacing:"0.01em",fontWeight:"500"}],"headline-lg":["32px",{lineHeight:"40px",letterSpacing:"-0.01em",fontWeight:"600"}]}}}
+  }
+</script>
+</head>
+<body class="bg-surface text-on-surface font-body-md">
+
+<header class="bg-surface shadow-sm fixed top-0 w-full z-30">
+  <div class="flex justify-between items-center w-full px-lg max-w-container-max mx-auto h-16">
+    <div class="flex items-center gap-md">
+      <a href="katalog.html" class="material-symbols-outlined text-primary hover:bg-surface-container p-1 rounded-lg transition-colors">arrow_back</a>
+      <h1 class="font-headline-md text-headline-md font-bold text-primary">Riwayat Pinjam</h1>
+    </div>
+    <nav class="hidden md:flex gap-xl items-center">
+      <a class="text-on-surface-variant hover:text-primary transition-colors" href="katalog.html">Dashboard</a>
+      <a class="text-on-surface-variant hover:text-primary transition-colors" href="katalog.html">Catalog</a>
+      <a class="text-on-surface-variant hover:text-primary transition-colors" href="profil.html">Profile</a>
+    </nav>
+    <a href="index.html" class="material-symbols-outlined text-on-surface-variant hover:text-error transition-colors">logout</a>
+  </div>
+</header>
+
+<main class="pt-24 pb-20 px-4 md:px-lg max-w-container-max mx-auto">
+
+  <!-- Filter Tabs -->
+  <div class="flex gap-sm mb-xl overflow-x-auto">
+    <button onclick="filterRiwayat('semua',this)" class="tab-btn bg-primary text-white px-md py-2 rounded-full font-label-md whitespace-nowrap" data-tab="semua">Semua</button>
+    <button onclick="filterRiwayat('dipinjam',this)" class="tab-btn bg-surface-container-high text-on-surface-variant px-md py-2 rounded-full font-label-md whitespace-nowrap hover:bg-surface-variant" data-tab="dipinjam">Sedang Dipinjam</button>
+    <button onclick="filterRiwayat('dikembalikan',this)" class="tab-btn bg-surface-container-high text-on-surface-variant px-md py-2 rounded-full font-label-md whitespace-nowrap hover:bg-surface-variant" data-tab="dikembalikan">Sudah Dikembalikan</button>
+    <button onclick="filterRiwayat('overdue',this)" class="tab-btn bg-surface-container-high text-on-surface-variant px-md py-2 rounded-full font-label-md whitespace-nowrap hover:bg-surface-variant" data-tab="overdue">Overdue</button>
+  </div>
+
+  <!-- Summary -->
+  <div class="grid grid-cols-3 gap-md mb-xl">
+    <div class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl text-center">
+      <p class="font-headline-md text-headline-md text-primary">47</p>
+      <p class="font-label-sm text-on-surface-variant">Total Pinjam</p>
+    </div>
+    <div class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl text-center">
+      <p class="font-headline-md text-headline-md text-secondary">4</p>
+      <p class="font-label-sm text-on-surface-variant">Aktif</p>
+    </div>
+    <div class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl text-center">
+      <p class="font-headline-md text-headline-md text-error">1</p>
+      <p class="font-label-sm text-on-surface-variant">Overdue</p>
+    </div>
+  </div>
+
+  <!-- List Riwayat -->
+  <div id="riwayat-list" class="space-y-md"></div>
+</main>
+
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-30 flex justify-around items-center py-2 bg-surface border-t border-outline-variant">
+  <a class="flex flex-col items-center text-on-surface-variant" href="katalog.html">
+    <span class="material-symbols-outlined">dashboard</span><span class="font-label-sm text-[10px]">Dashboard</span>
+  </a>
+  <a class="flex flex-col items-center text-on-surface-variant" href="katalog.html">
+    <span class="material-symbols-outlined">auto_stories</span><span class="font-label-sm text-[10px]">Catalog</span>
+  </a>
+  <a class="flex flex-col items-center text-on-surface-variant" href="profil.html">
+    <span class="material-symbols-outlined">person</span><span class="font-label-sm text-[10px]">Profile</span>
+  </a>
+</nav>
+
+<script>
+const riwayatData = [
+  { id:'RW001', judul:'Sapiens: A Brief History', pengarang:'Yuval Noah Harari', tglPinjam:'10 Okt 2024', tglKembali:'24 Okt 2024', status:'overdue', cover:'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=80' },
+  { id:'RW002', judul:'Thinking, Fast and Slow', pengarang:'Daniel Kahneman', tglPinjam:'08 Okt 2024', tglKembali:'22 Okt 2024', status:'dipinjam', cover:'https://images.unsplash.com/photo-1532012197267-da84d127e765?auto=format&fit=crop&q=80&w=80' },
+  { id:'RW003', judul:'The Great Gatsby', pengarang:'F. Scott Fitzgerald', tglPinjam:'05 Okt 2024', tglKembali:'19 Okt 2024', status:'dipinjam', cover:'https://images.unsplash.com/photo-1541963463532-d68292c34b19?auto=format&fit=crop&q=80&w=80' },
+  { id:'RW004', judul:'A Promised Land', pengarang:'Barack Obama', tglPinjam:'02 Okt 2024', tglKembali:'16 Okt 2024', status:'dipinjam', cover:'https://images.unsplash.com/photo-1589998059171-988d887df646?auto=format&fit=crop&q=80&w=80' },
+  { id:'RW005', judul:'Clean Code', pengarang:'Robert C. Martin', tglPinjam:'18 Sep 2024', tglKembali:'02 Okt 2024', status:'dikembalikan', cover:'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=80' },
+  { id:'RW006', judul:'Design for the Real World', pengarang:'Victor Papanek', tglPinjam:'01 Sep 2024', tglKembali:'15 Sep 2024', status:'dikembalikan', cover:'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=80' },
+  { id:'RW007', judul:'Dune', pengarang:'Frank Herbert', tglPinjam:'10 Ags 2024', tglKembali:'24 Ags 2024', status:'dikembalikan', cover:'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=80' },
+];
+
+const statusConfig = {
+  dipinjam: { label:'Dipinjam', cls:'bg-primary-container text-on-primary-container' },
+  dikembalikan: { label:'Dikembalikan', cls:'bg-secondary-container text-on-secondary-container' },
+  overdue: { label:'Overdue', cls:'bg-error-container text-on-error-container' },
+};
+
+let currentTab = 'semua';
+
+function renderRiwayat(data) {
+  const list = document.getElementById('riwayat-list');
+  list.innerHTML = '';
+  if (!data.length) {
+    list.innerHTML = '<div class="text-center py-xl"><span class="material-symbols-outlined text-[48px] text-outline">inbox</span><p class="text-on-surface-variant mt-md">Tidak ada data riwayat.</p></div>';
+    return;
+  }
+  data.forEach(item => {
+    const s = statusConfig[item.status];
+    const isOverdue = item.status === 'overdue';
+    list.insertAdjacentHTML('beforeend', `
+      <div class="bg-surface-container-lowest border ${isOverdue ? 'border-error/40' : 'border-outline-variant'} rounded-xl p-md shadow-sm flex items-start gap-md hover:shadow-md transition-shadow">
+        <img src="${item.cover}" alt="${item.judul}" class="w-14 h-20 object-cover rounded-lg flex-shrink-0 shadow-sm"/>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-start justify-between gap-sm">
+            <div>
+              <h4 class="font-body-md font-bold text-on-surface line-clamp-1">${item.judul}</h4>
+              <p class="font-body-sm text-on-surface-variant">${item.pengarang}</p>
+            </div>
+            <span class="px-sm py-xs rounded-full font-label-sm whitespace-nowrap flex-shrink-0 ${s.cls}">${s.label}</span>
+          </div>
+          <div class="mt-sm flex flex-wrap gap-md text-label-sm text-on-surface-variant">
+            <span class="flex items-center gap-xs"><span class="material-symbols-outlined text-[14px]">calendar_today</span> Pinjam: ${item.tglPinjam}</span>
+            <span class="flex items-center gap-xs"><span class="material-symbols-outlined text-[14px]">${item.status === 'dikembalikan' ? 'event_available' : 'event_busy'}</span> Kembali: ${item.tglKembali}</span>
+          </div>
+          ${isOverdue ? `<div class="mt-sm flex items-center gap-xs text-error font-label-sm"><span class="material-symbols-outlined text-[14px]">report</span> Terlambat — silakan kembalikan segera</div>` : ''}
+        </div>
+      </div>
+    `);
+  });
+}
+
+function filterRiwayat(tab, btn) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    b.classList.remove('bg-primary','text-white');
+    b.classList.add('bg-surface-container-high','text-on-surface-variant');
+  });
+  btn.classList.add('bg-primary','text-white');
+  btn.classList.remove('bg-surface-container-high','text-on-surface-variant');
+  const filtered = tab === 'semua' ? riwayatData : riwayatData.filter(r => r.status === tab);
+  renderRiwayat(filtered);
+}
+
+renderRiwayat(riwayatData);
+</script>
+</body>
+</html>

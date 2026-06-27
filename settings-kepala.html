@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Athenaeum Library | Pengaturan</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries">
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <style>
+    /* ----- reset & base ----- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100dvh;
+      font-family: 'Inter', sans-serif;
+      background-color: #f7f9fb;
+      color: #191c1e;
+    }
+
+    /* ----- utility ----- */
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      line-height: 1;
+      vertical-align: middle;
+    }
+
+    /* ----- toggle switch ----- */
+    .toggle-input:checked+.toggle-track {
+      background-color: #00236f;
+    }
+
+    .toggle-input:checked+.toggle-track .toggle-thumb {
+      transform: translateX(20px);
+    }
+
+    .toggle-track {
+      display: flex;
+      align-items: center;
+      width: 44px;
+      height: 24px;
+      background-color: #c5c5d3;
+      border-radius: 999px;
+      transition: background-color 0.2s;
+      position: relative;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .toggle-thumb {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      background-color: white;
+      border-radius: 999px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      transition: transform 0.2s;
+    }
+
+    /* ----- toast ----- */
+    .toast {
+      position: fixed;
+      bottom: 88px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #191c1e;
+      color: #eff1f3;
+      padding: 10px 20px;
+      border-radius: 999px;
+      z-index: 99;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      font-weight: 500;
+      letter-spacing: 0.3px;
+    }
+
+    .toast .material-symbols-outlined {
+      font-size: 18px;
+      color: #6df5e1;
+    }
+
+    /* ----- input focus (perbaikan CSS) ----- */
+    input:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px #00236f;
+      border-color: #00236f;
+    }
+
+    /* ----- container full width ----- */
+    .container-full {
+      max-width: 1280px;
+      margin-left: auto;
+      margin-right: auto;
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+
+    @media (min-width: 1024px) {
+      .container-full {
+        padding-left: 2rem;
+        padding-right: 2rem;
+      }
+    }
+
+    .main-full {
+      flex: 1;
+      min-width: 0;
+      width: 100%;
+    }
+  </style>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#00236f",
+            "on-primary": "#ffffff",
+            "primary-container": "#1e3a8a",
+            "on-primary-container": "#90a8ff",
+            "primary-fixed": "#dce1ff",
+            secondary: "#006b5f",
+            "secondary-container": "#6df5e1",
+            "on-secondary-container": "#006f64",
+            surface: "#f7f9fb",
+            "on-surface": "#191c1e",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-low": "#f2f4f6",
+            "surface-container": "#eceef0",
+            "surface-container-high": "#e6e8ea",
+            "surface-container-highest": "#e0e3e5",
+            "on-surface-variant": "#444651",
+            outline: "#757682",
+            "outline-variant": "#c5c5d3",
+            error: "#ba1a1a",
+            "on-error": "#ffffff",
+            "error-container": "#ffdad6",
+            "on-error-container": "#93000a",
+          },
+          spacing: {
+            xs: "4px",
+            sm: "8px",
+            md: "16px",
+            lg: "24px",
+            xl: "40px",
+            "container-max": "1280px",
+          },
+          fontFamily: {
+            "body-sm": ["Inter", "sans-serif"],
+            "body-md": ["Inter", "sans-serif"],
+            "label-sm": ["Inter", "sans-serif"],
+            "label-md": ["Inter", "sans-serif"],
+            "headline-md": ["Plus Jakarta Sans", "sans-serif"],
+            "headline-lg": ["Plus Jakarta Sans", "sans-serif"],
+          },
+          fontSize: {
+            "body-sm": ["14px", { lineHeight: "20px" }],
+            "body-md": ["16px", { lineHeight: "24px" }],
+            "label-sm": ["12px", { lineHeight: "16px", fontWeight: "600" }],
+            "label-md": ["14px", { lineHeight: "20px", fontWeight: "500" }],
+            "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+            "headline-lg": ["32px", { lineHeight: "40px", fontWeight: "600" }],
+          },
+        },
+      },
+    };
+  </script>
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header class="bg-surface shadow-sm sticky top-0 z-40 h-16 flex items-center justify-between w-full container-full">
+    <div class="flex items-center gap-3">
+      <a href="dashboard-kepala.html" class="material-symbols-outlined text-primary hover:bg-surface-container p-1.5 rounded-lg transition-colors">
+        arrow_back
+      </a>
+      <h1 class="font-headline-md text-headline-md font-bold text-primary">Athenaeum Library</h1>
+    </div>
+
+    <span class="hidden md:block font-label-md text-on-surface-variant">Kepala Perpustakaan</span>
+
+    <div class="flex items-center gap-3">
+      <a href="index.html" class="material-symbols-outlined text-on-surface-variant hover:text-error transition-colors" title="Logout">
+        logout
+      </a>
+    </div>
+  </header>
+
+  <!-- ===== LAYOUT: SIDEBAR + MAIN ===== -->
+  <div class="flex container-full min-h-[calc(100dvh-4rem)]">
+
+    <!-- SIDEBAR (desktop) - layout & jarak disamakan dengan halaman Transaksi -->
+    <aside class="hidden lg:flex flex-col h-full py-4 w-64 bg-surface-container-low border-r border-outline-variant flex-shrink-0">
+      <!-- Profile section: jarak dan padding disamakan -->
+      <div class="px-4 mb-8 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-full overflow-hidden bg-surface-variant border border-outline flex-shrink-0">
+          <img alt="Librarian Admin" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCc6HcgcIm7S91qkbrzl8WThfqPybgRJ3pY18PUJO47KgotedMJH3i4ZsuJm27o-SN8dPgwOxmRAQYcg7bGe9Yl5ciJP-5w1aG8PSz1-law_qytzT3ajFGh3o7rO6tWAIJz_c6RQKm5CDvsAlEGwcpy4s_Y3lZcrixzoQKu8TNwExN4S_v_sVmNVVy2f0W2fWPGPOZ8ctbqw2FexZ4idm7Mk7pPYN4rpF4fF1K7QpXdfHx-pKtYm_ks4lD3MSbvT2HYWj-hQrG87FM" />
+        </div>
+        <div>
+          <p class="font-body-md font-bold text-primary">Librarian Admin</p>
+          <p class="text-[10px] text-on-surface-variant uppercase tracking-wider">Role: Admin</p>
+        </div>
+      </div>
+
+      <!-- Navigation: menggunakan space-y-2 seperti halaman Transaksi -->
+      <nav class="flex-1 space-y-2">
+        <a href="dashboard-kepala.html" class="text-on-surface-variant hover:bg-surface-variant mx-2 px-3 py-2 rounded-lg flex items-center gap-3 transition-all">
+          <span class="material-symbols-outlined">assessment</span>
+          <span class="font-body-md">Dashboard</span>
+        </a>
+        <a href="bookshelf-kepala.html" class="text-on-surface-variant hover:bg-surface-variant mx-2 px-3 py-2 rounded-lg flex items-center gap-3 transition-all">
+          <span class="material-symbols-outlined">library_books</span>
+          <span class="font-body-md">Bookshelf</span>
+        </a>
+        <a href="transaksi-kepala.html" class="text-on-surface-variant hover:bg-surface-variant mx-2 px-3 py-2 rounded-lg flex items-center gap-3 transition-all">
+          <span class="material-symbols-outlined">swap_horiz</span>
+          <span class="font-body-md">Transactions</span>
+        </a>
+        <!-- Settings aktif dengan gaya yang sama seperti di halaman Transaksi -->
+        <div class="bg-primary-container text-on-primary-container mx-2 px-3 py-2 rounded-lg flex items-center gap-3">
+          <span class="material-symbols-outlined">settings</span>
+          <span class="font-body-md">Settings</span>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="main-full px-4 py-6 lg:px-8">
+      <div class="mb-6">
+        <h2 class="font-headline-lg text-headline-lg text-on-surface">Pengaturan</h2>
+        <p class="font-body-md text-on-surface-variant">Konfigurasi sistem perpustakaan.</p>
+      </div>
+
+      <div class="max-w-4xl">
+        <!-- Pengaturan Umum -->
+        <section class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm mb-6">
+          <div class="px-5 py-3.5 border-b border-outline-variant bg-surface-container-low">
+            <h3 class="font-headline-md text-headline-md text-on-surface">Pengaturan Umum</h3>
+          </div>
+          <div class="divide-y divide-outline-variant">
+            <div class="px-5 py-3.5">
+              <label class="font-label-md text-on-surface-variant block mb-1">Nama Perpustakaan</label>
+              <input type="text" value="Athenaeum Library" class="w-full border border-outline-variant rounded-lg py-2 px-3.5 focus:ring-2 focus:ring-primary bg-white font-body-md" />
+            </div>
+            <div class="px-5 py-3.5">
+              <label class="font-label-md text-on-surface-variant block mb-1">Durasi Pinjam Default (hari)</label>
+              <input type="number" value="14" min="1" max="60" class="w-full border border-outline-variant rounded-lg py-2 px-3.5 focus:ring-2 focus:ring-primary bg-white font-body-md" />
+            </div>
+            <div class="px-5 py-3.5">
+              <label class="font-label-md text-on-surface-variant block mb-1">Denda Keterlambatan (Rp/hari)</label>
+              <input type="number" value="1000" min="0" class="w-full border border-outline-variant rounded-lg py-2 px-3.5 focus:ring-2 focus:ring-primary bg-white font-body-md" />
+            </div>
+            <div class="px-5 py-3.5">
+              <label class="font-label-md text-on-surface-variant block mb-1">Maksimal Buku Dipinjam (per anggota)</label>
+              <input type="number" value="7" min="1" max="20" class="w-full border border-outline-variant rounded-lg py-2 px-3.5 focus:ring-2 focus:ring-primary bg-white font-body-md" />
+            </div>
+          </div>
+        </section>
+
+        <!-- Pengaturan Notifikasi -->
+        <section class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm mb-6">
+          <div class="px-5 py-3.5 border-b border-outline-variant bg-surface-container-low">
+            <h3 class="font-headline-md text-headline-md text-on-surface">Notifikasi</h3>
+          </div>
+          <div class="divide-y divide-outline-variant">
+            <div class="px-5 py-3.5 flex justify-between items-center gap-4">
+              <div>
+                <p class="font-body-md text-on-surface">Notifikasi Jatuh Tempo</p>
+                <p class="font-body-sm text-on-surface-variant">Kirim pengingat H-3 sebelum jatuh tempo</p>
+              </div>
+              <label class="relative cursor-pointer flex-shrink-0">
+                <input type="checkbox" class="toggle-input sr-only" checked onchange="simpanToggle(this, 'notif-jatuh-tempo')" />
+                <div class="toggle-track">
+                  <div class="toggle-thumb"></div>
+                </div>
+              </label>
+            </div>
+            <div class="px-5 py-3.5 flex justify-between items-center gap-4">
+              <div>
+                <p class="font-body-md text-on-surface">Notifikasi Overdue</p>
+                <p class="font-body-sm text-on-surface-variant">Kirim peringatan jika buku melewati batas kembali</p>
+              </div>
+              <label class="relative cursor-pointer flex-shrink-0">
+                <input type="checkbox" class="toggle-input sr-only" checked onchange="simpanToggle(this, 'notif-overdue')" />
+                <div class="toggle-track">
+                  <div class="toggle-thumb"></div>
+                </div>
+              </label>
+            </div>
+            <div class="px-5 py-3.5 flex justify-between items-center gap-4">
+              <div>
+                <p class="font-body-md text-on-surface">Laporan Periodik Otomatis</p>
+                <p class="font-body-sm text-on-surface-variant">Kirim laporan bulanan ke email kepala</p>
+              </div>
+              <label class="relative cursor-pointer flex-shrink-0">
+                <input type="checkbox" class="toggle-input sr-only" onchange="simpanToggle(this, 'laporan-otomatis')" />
+                <div class="toggle-track">
+                  <div class="toggle-thumb"></div>
+                </div>
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <!-- Tombol Aksi -->
+        <div class="flex flex-wrap gap-3">
+          <button onclick="resetPengaturan()" class="border border-outline-variant text-on-surface-variant px-5 py-2.5 rounded-lg font-label-md hover:bg-surface-container transition-colors">
+            Reset
+          </button>
+          <button onclick="simpanPengaturan()" class="bg-primary-container text-on-primary px-5 py-2.5 rounded-lg font-label-md hover:bg-primary-container/90 active:scale-95 transition-all flex items-center gap-2">
+            <span class="material-symbols-outlined text-[18px]">save</span>
+            Simpan Pengaturan
+          </button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- ===== BOTTOM NAV (mobile) ===== -->
+  <nav class="lg:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center py-2 bg-surface shadow-lg border-t border-outline-variant">
+    <a href="dashboard-kepala.html" class="flex flex-col items-center text-on-surface-variant">
+      <span class="material-symbols-outlined">assessment</span>
+      <span class="font-label-sm text-[10px]">Dashboard</span>
+    </a>
+    <a href="bookshelf-kepala.html" class="flex flex-col items-center text-on-surface-variant">
+      <span class="material-symbols-outlined">library_books</span>
+      <span class="font-label-sm text-[10px]">Bookshelf</span>
+    </a>
+    <a href="transaksi-kepala.html" class="flex flex-col items-center text-on-surface-variant">
+      <span class="material-symbols-outlined">swap_horiz</span>
+      <span class="font-label-sm text-[10px]">Transaksi</span>
+    </a>
+    <a href="settings-kepala.html" class="flex flex-col items-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1">
+      <span class="material-symbols-outlined">settings</span>
+      <span class="font-label-sm text-[10px]">Settings</span>
+    </a>
+  </nav>
+
+  <!-- ===== SCRIPTS ===== -->
+  <script>
+    function tampilToast(msg) {
+      const existing = document.querySelector('.toast');
+      if (existing) existing.remove();
+
+      const t = document.createElement('div');
+      t.className = 'toast';
+      t.innerHTML = `<span class="material-symbols-outlined">check_circle</span> ${msg}`;
+      document.body.appendChild(t);
+
+      setTimeout(() => {
+        if (t.parentNode) t.remove();
+      }, 3000);
+    }
+
+    function simpanToggle(el, key) {
+      const label = key.replace(/-/g, ' ');
+      tampilToast((el.checked ? 'Aktif: ' : 'Nonaktif: ') + label);
+    }
+
+    function simpanPengaturan() {
+      tampilToast('Pengaturan berhasil disimpan!');
+    }
+
+    function resetPengaturan() {
+      if (confirm('Reset semua pengaturan ke default?')) {
+        tampilToast('Pengaturan direset ke default.');
+        document.querySelectorAll('.toggle-input').forEach((cb, idx) => {
+          if (idx === 0 || idx === 1) cb.checked = true;
+          else if (idx === 2) cb.checked = false;
+          const track = cb.closest('label')?.querySelector('.toggle-track');
+          if (track) {
+            if (cb.checked) {
+              track.style.backgroundColor = '#00236f';
+              const thumb = track.querySelector('.toggle-thumb');
+              if (thumb) thumb.style.transform = 'translateX(20px)';
+            } else {
+              track.style.backgroundColor = '#c5c5d3';
+              const thumb = track.querySelector('.toggle-thumb');
+              if (thumb) thumb.style.transform = 'translateX(0)';
+            }
+          }
+        });
+        const inputs = document.querySelectorAll('input[type="text"], input[type="number"]');
+        if (inputs.length >= 4) {
+          inputs[0].value = 'Athenaeum Library';
+          inputs[1].value = '14';
+          inputs[2].value = '1000';
+          inputs[3].value = '7';
+        }
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.toggle-input').forEach(cb => {
+        const track = cb.closest('label')?.querySelector('.toggle-track');
+        if (track) {
+          if (cb.checked) {
+            track.style.backgroundColor = '#00236f';
+            const thumb = track.querySelector('.toggle-thumb');
+            if (thumb) thumb.style.transform = 'translateX(20px)';
+          } else {
+            track.style.backgroundColor = '#c5c5d3';
+            const thumb = track.querySelector('.toggle-thumb');
+            if (thumb) thumb.style.transform = 'translateX(0)';
+          }
+        }
+        cb.addEventListener('change', function(e) {
+          const track = this.closest('label')?.querySelector('.toggle-track');
+          if (track) {
+            if (this.checked) {
+              track.style.backgroundColor = '#00236f';
+              const thumb = track.querySelector('.toggle-thumb');
+              if (thumb) thumb.style.transform = 'translateX(20px)';
+            } else {
+              track.style.backgroundColor = '#c5c5d3';
+              const thumb = track.querySelector('.toggle-thumb');
+              if (thumb) thumb.style.transform = 'translateX(0)';
+            }
+          }
+        });
+      });
+    });
+  </script>
+
+</body>
+</html>

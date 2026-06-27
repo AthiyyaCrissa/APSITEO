@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Athenaeum Library | Catalog</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  body { min-height: max(884px, 100dvh); }
+  #filter-panel { display: none; }
+  #filter-panel.show { display: block; }
+  #borrow-modal { display: none; }
+  #borrow-modal.show { display: flex; }
+  #overlay { transition: opacity 0.2s; }
+</style>
+<script>
+  tailwind.config = {
+    darkMode:"class",
+    theme:{extend:{colors:{
+      "on-secondary-container":"#006f64","secondary-container":"#6df5e1","primary":"#00236f",
+      "surface-container-lowest":"#ffffff","on-background":"#191c1e","surface":"#f7f9fb",
+      "surface-container-highest":"#e0e3e5","on-secondary":"#ffffff","surface-variant":"#e0e3e5",
+      "on-surface":"#191c1e","error":"#ba1a1a","background":"#f7f9fb",
+      "surface-container-high":"#e6e8ea","on-primary-container":"#90a8ff",
+      "secondary":"#006b5f","on-primary":"#ffffff","outline":"#757682",
+      "on-error-container":"#93000a","surface-container":"#eceef0",
+      "on-surface-variant":"#444651","on-error":"#ffffff","primary-container":"#1e3a8a",
+      "error-container":"#ffdad6","primary-fixed":"#dce1ff","outline-variant":"#c5c5d3",
+      "surface-container-low":"#f2f4f6","tertiary-fixed":"#e2dfff","on-tertiary-fixed":"#0f0069",
+      "tertiary":"#190093"
+    },
+    spacing:{xs:"4px","container-max":"1280px",gutter:"24px",lg:"24px",base:"4px",sm:"8px",xl:"40px",md:"16px"},
+    fontFamily:{"body-sm":["Inter"],"headline-md":["Plus Jakarta Sans"],"label-sm":["Inter"],"body-md":["Inter"],"label-md":["Inter"],"headline-lg":["Plus Jakarta Sans"],"headline-lg-mobile":["Plus Jakarta Sans"]},
+    fontSize:{
+      "body-sm":["14px",{lineHeight:"20px",fontWeight:"400"}],
+      "headline-md":["24px",{lineHeight:"32px",fontWeight:"600"}],
+      "label-sm":["12px",{lineHeight:"16px",fontWeight:"600"}],
+      "body-md":["16px",{lineHeight:"24px",fontWeight:"400"}],
+      "body-lg":["18px",{lineHeight:"28px",fontWeight:"400"}],
+      "label-md":["14px",{lineHeight:"20px",letterSpacing:"0.01em",fontWeight:"500"}],
+      "headline-lg":["32px",{lineHeight:"40px",letterSpacing:"-0.01em",fontWeight:"600"}],
+      "headline-lg-mobile":["24px",{lineHeight:"32px",fontWeight:"600"}]
+    }}}
+  }
+</script>
+</head>
+<body class="bg-surface text-on-surface font-body-md">
+
+<!-- OVERLAY -->
+<div id="overlay" class="fixed inset-0 bg-black/40 z-40 opacity-0 pointer-events-none" onclick="closeAll()"></div>
+
+<!-- HEADER -->
+<header class="bg-surface shadow-sm fixed top-0 w-full z-30">
+  <div class="flex justify-between items-center w-full px-lg max-w-container-max mx-auto h-16">
+    <div class="flex items-center gap-md">
+      <a href="katalog.html" class="material-symbols-outlined text-primary hover:bg-surface-container p-1 rounded-lg transition-colors">arrow_back</a>
+      <h1 class="font-headline-md text-headline-md font-bold text-primary">Athenaeum Library</h1>
+    </div>
+    <nav class="hidden md:flex gap-xl items-center">
+      <a class="text-on-surface-variant hover:text-primary transition-colors" href="katalog.html">Dashboard</a>
+      <a class="text-primary font-bold border-b-2 border-primary py-2" href="catalog.html">Catalog</a>
+      <a class="text-on-surface-variant hover:text-primary transition-colors" href="profil.html">Profile</a>
+    </nav>
+    <div class="flex items-center gap-md">
+      <a href="notifikasi.html" class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">notifications</a>
+      <a href="profil.html" class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-sm hover:ring-2 hover:ring-primary transition-all">JD</a>
+      <a href="index.html" class="material-symbols-outlined text-on-surface-variant hover:text-error transition-colors">logout</a>
+    </div>
+  </div>
+</header>
+
+<main class="pt-24 pb-20 px-4 md:px-lg max-w-container-max mx-auto">
+
+  <!-- Page Title -->
+  <div class="mb-lg">
+    <h2 class="font-headline-lg text-headline-lg text-on-surface">Katalog Buku</h2>
+    <p class="text-on-surface-variant font-body-md">Temukan buku yang kamu inginkan dari koleksi kami.</p>
+  </div>
+
+  <!-- Search -->
+  <section class="mb-lg">
+    <div class="relative group">
+      <div class="absolute inset-y-0 left-0 pl-md flex items-center pointer-events-none">
+        <span class="material-symbols-outlined text-outline group-focus-within:text-primary transition-colors">search</span>
+      </div>
+      <input id="search-input" oninput="applyFilters()" class="block w-full pl-12 pr-32 py-4 bg-surface-container-lowest border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent shadow-sm transition-all text-body-lg font-body-lg" placeholder="Cari judul, pengarang, atau ISBN..." type="text"/>
+      <button onclick="toggleFilter()" class="absolute inset-y-0 right-4 flex items-center text-primary font-label-md hover:text-primary/70 gap-1">
+        <span class="material-symbols-outlined">tune</span>
+        <span class="hidden md:inline font-label-md">Filter</span>
+      </button>
+    </div>
+
+    <!-- Filter Panel -->
+    <div id="filter-panel" class="mt-md bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-sm">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+        <div>
+          <label class="font-label-sm text-on-surface-variant block mb-xs">Kategori</label>
+          <select id="sel-category" onchange="applyFilters()" class="w-full border border-outline-variant rounded-lg py-2 px-md text-body-md bg-white focus:ring-1 focus:ring-primary">
+            <option value="Semua">Semua Kategori</option>
+            <option value="Fiksi">Fiksi</option>
+            <option value="Sains">Sains</option>
+            <option value="Sejarah">Sejarah</option>
+            <option value="Teknologi">Teknologi</option>
+            <option value="Design">Design</option>
+            <option value="Psychology">Psychology</option>
+            <option value="Biography">Biography</option>
+          </select>
+        </div>
+        <div>
+          <label class="font-label-sm text-on-surface-variant block mb-xs">Status</label>
+          <select id="sel-status" onchange="applyFilters()" class="w-full border border-outline-variant rounded-lg py-2 px-md text-body-md bg-white focus:ring-1 focus:ring-primary">
+            <option value="Semua">Semua Status</option>
+            <option value="Available">Tersedia</option>
+            <option value="Borrowed">Dipinjam</option>
+          </select>
+        </div>
+        <div>
+          <label class="font-label-sm text-on-surface-variant block mb-xs">Urutkan</label>
+          <select id="sel-sort" onchange="applyFilters()" class="w-full border border-outline-variant rounded-lg py-2 px-md text-body-md bg-white focus:ring-1 focus:ring-primary">
+            <option value="default">Default</option>
+            <option value="az">Judul A–Z</option>
+            <option value="za">Judul Z–A</option>
+            <option value="available">Tersedia Dulu</option>
+          </select>
+        </div>
+      </div>
+      <div class="mt-md flex justify-end gap-sm">
+        <button onclick="resetFilter()" class="border border-outline-variant text-on-surface-variant px-md py-2 rounded-lg font-label-md hover:bg-surface-container transition-colors">Reset</button>
+        <button onclick="toggleFilter()" class="bg-primary text-white px-md py-2 rounded-lg font-label-md hover:bg-primary/90 transition-colors">Tutup</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Filter Chips -->
+  <div class="flex gap-sm overflow-x-auto pb-2 mb-lg" style="scrollbar-width:none">
+    <button onclick="setChip('Semua',this)" class="chip-btn bg-primary text-white px-md py-2 rounded-full font-label-md whitespace-nowrap flex-shrink-0" data-cat="Semua">Semua</button>
+    <button onclick="setChip('Fiksi',this)" class="chip-btn bg-surface-container-high text-on-surface-variant px-md py-2 rounded-full font-label-md whitespace-nowrap flex-shrink-0 hover:bg-surface-variant transition-colors" data-cat="Fiksi">Fiksi</button>
+    <button onclick="setChip('Sains',this)" class="chip-btn bg-surface-container-high text-on-surface-variant px-md py-2 rounded-full font-label-md whitespace-nowrap flex-shrink-0 hover:bg-surface-variant transition-colors" data-cat="Sains">Sains</button>
+    <button onclick="setChip('Sejarah',this)" class="chip-btn bg-surface-container-high text-on-surface-variant px-md py-2 rounded-full font-label-md whitespace-nowrap flex-shrink-0 hover:bg-surface-variant transition-colors" data-cat="Sejarah">Sejarah</button>
+    <button onclick="setChip('Teknologi',this)" class="chip-btn bg-surface-container-high text-on-surface-variant px-md py-2 rounded-full font-label-md whitespace-nowrap flex-shrink-0 hover:bg-surface-variant transition-colors" data-cat="Teknologi">Teknologi</button>
+    <button onclick="setChip('Design',this)" class="chip-btn bg-surface-container-high text-on-surface-variant px-md py-2 rounded-full font-label-md whitespace-nowrap flex-shrink-0 hover:bg-surface-variant transition-colors" data-cat="Design">Design</button>
+    <button onclick="setChip('Sejarah',this)" class="chip-btn bg-surface-container-high text-on-surface-variant px-md py-2 rounded-full font-label-md whitespace-nowrap flex-shrink-0 hover:bg-surface-variant transition-colors" data-cat="Biography">Biography</button>
+  </div>
+
+  <!-- Result Info -->
+  <div class="flex justify-between items-center mb-md">
+    <p id="result-info" class="font-body-sm text-on-surface-variant"></p>
+    <!-- Toggle Grid/List -->
+    <div class="flex gap-xs">
+      <button id="btn-grid" onclick="setView('grid')" class="p-2 rounded-lg bg-primary text-white transition-colors">
+        <span class="material-symbols-outlined text-[20px]">grid_view</span>
+      </button>
+      <button id="btn-list" onclick="setView('list')" class="p-2 rounded-lg bg-surface-container-high text-on-surface-variant hover:bg-surface-variant transition-colors">
+        <span class="material-symbols-outlined text-[20px]">view_list</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Catalog Grid -->
+  <div id="catalog-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-lg"></div>
+
+  <!-- No Result -->
+  <div id="no-result" class="hidden text-center py-xl">
+    <span class="material-symbols-outlined text-[56px] text-outline">search_off</span>
+    <p class="font-headline-md text-headline-md text-on-surface mt-md">Tidak ada buku ditemukan</p>
+    <p class="text-on-surface-variant font-body-md">Coba kata kunci atau filter yang berbeda.</p>
+    <button onclick="resetFilter()" class="mt-md border border-primary text-primary px-lg py-2 rounded-full font-label-md hover:bg-primary-fixed transition-colors">Reset Filter</button>
+  </div>
+
+  <!-- Load More -->
+  <div class="mt-xl flex justify-center" id="load-more-wrap">
+    <button id="load-more-btn" onclick="loadMore()" class="border border-primary text-primary px-lg py-md rounded-full font-label-md hover:bg-primary-fixed transition-all active:scale-95 flex items-center gap-sm">
+      <span class="material-symbols-outlined text-[18px]">expand_more</span> Load More Titles
+    </button>
+  </div>
+
+</main>
+
+<!-- BORROW MODAL -->
+<div id="borrow-modal" class="fixed inset-0 z-50 bg-black/50 items-center justify-center px-4">
+  <div class="bg-surface-container-lowest rounded-2xl w-full max-w-md shadow-xl p-lg">
+    <div class="flex justify-between items-start mb-md">
+      <h3 class="font-headline-md text-headline-md text-on-surface">Konfirmasi Peminjaman</h3>
+      <button onclick="closeBorrowModal()" class="material-symbols-outlined text-on-surface-variant hover:text-error transition-colors">close</button>
+    </div>
+    <div class="bg-surface-container p-md rounded-xl mb-md">
+      <p class="font-label-sm text-on-surface-variant uppercase tracking-wider mb-xs">Buku yang akan dipinjam</p>
+      <p id="modal-title" class="font-body-md font-bold text-on-surface"></p>
+      <p id="modal-author" class="font-body-sm text-on-surface-variant"></p>
+    </div>
+    <div class="space-y-sm mb-lg text-body-sm">
+      <div class="flex justify-between"><span class="text-on-surface-variant">Durasi pinjam</span><span class="font-bold">14 hari</span></div>
+      <div class="flex justify-between"><span class="text-on-surface-variant">Denda keterlambatan</span><span class="font-bold">Rp 1.000/hari</span></div>
+      <div class="flex justify-between"><span class="text-on-surface-variant">Kuota pinjam tersisa</span><span class="font-bold text-secondary">3 buku</span></div>
+    </div>
+    <div class="flex gap-sm">
+      <button onclick="closeBorrowModal()" class="flex-1 border border-outline-variant text-on-surface-variant py-3 rounded-lg font-label-md hover:bg-surface-container transition-colors">Batal</button>
+      <button onclick="confirmBorrow()" class="flex-1 bg-primary-container text-on-primary py-3 rounded-lg font-label-md hover:bg-primary-container/90 active:scale-[0.98] transition-all flex items-center justify-center gap-sm">
+        <span class="material-symbols-outlined text-[18px]">bookmark_add</span> Pinjam Sekarang
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-30 flex justify-around items-center py-2 bg-surface border-t border-outline-variant">
+  <a class="flex flex-col items-center text-on-surface-variant" href="katalog.html">
+    <span class="material-symbols-outlined">dashboard</span>
+    <span class="font-label-sm text-[10px]">Dashboard</span>
+  </a>
+  <a class="flex flex-col items-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1" href="catalog.html">
+    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">auto_stories</span>
+    <span class="font-label-sm text-[10px]">Catalog</span>
+  </a>
+  <a class="flex flex-col items-center text-on-surface-variant" href="profil.html">
+    <span class="material-symbols-outlined">person</span>
+    <span class="font-label-sm text-[10px]">Profile</span>
+  </a>
+</nav>
+
+<script>
+const allBooks = [
+  { title:"Design for the Real World", author:"Victor Papanek", category:"Design", status:"Available", img:"https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=400" },
+  { title:"Sapiens: A Brief History", author:"Yuval Noah Harari", category:"Sejarah", status:"Borrowed", img:"https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=400" },
+  { title:"The Design of Everyday Things", author:"Don Norman", category:"Design", status:"Available", img:"https://images.unsplash.com/photo-1541963463532-d68292c34b19?auto=format&fit=crop&q=80&w=400" },
+  { title:"Thinking, Fast and Slow", author:"Daniel Kahneman", category:"Sains", status:"Available", img:"https://images.unsplash.com/photo-1532012197267-da84d127e765?auto=format&fit=crop&q=80&w=400" },
+  { title:"Brief Answers to the Big Questions", author:"Stephen Hawking", category:"Sains", status:"Borrowed", img:"https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&q=80&w=400" },
+  { title:"The Great Gatsby", author:"F. Scott Fitzgerald", category:"Fiksi", status:"Available", img:"https://images.unsplash.com/photo-1541963463532-d68292c34b19?auto=format&fit=crop&q=80&w=400" },
+  { title:"A Promised Land", author:"Barack Obama", category:"Biography", status:"Available", img:"https://images.unsplash.com/photo-1589998059171-988d887df646?auto=format&fit=crop&q=80&w=400" },
+  { title:"Invisible Women", author:"Caroline Criado Perez", category:"Sains", status:"Available", img:"https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=400" },
+  { title:"Clean Code", author:"Robert C. Martin", category:"Teknologi", status:"Available", img:"https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=400" },
+  { title:"The Pragmatic Programmer", author:"David Thomas", category:"Teknologi", status:"Borrowed", img:"https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&q=80&w=400" },
+  { title:"Dune", author:"Frank Herbert", category:"Fiksi", status:"Available", img:"https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400" },
+  { title:"Sejarah Indonesia Modern", author:"M.C. Ricklefs", category:"Sejarah", status:"Available", img:"https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&q=80&w=400" },
+  { title:"Atomic Habits", author:"James Clear", category:"Sains", status:"Available", img:"https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&q=80&w=400" },
+  { title:"Laskar Pelangi", author:"Andrea Hirata", category:"Fiksi", status:"Available", img:"https://images.unsplash.com/photo-1476275466078-4007374efbbe?auto=format&fit=crop&q=80&w=400" },
+  { title:"You Look Like a Thing and I Love You", author:"Janelle Shane", category:"Teknologi", status:"Available", img:"https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&q=80&w=400" },
+  { title:"Brief History of Time", author:"Stephen Hawking", category:"Sains", status:"Borrowed", img:"https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&q=80&w=400" },
+];
+
+const extraBooks = [
+  { title:"The Psychology of Money", author:"Morgan Housel", category:"Biography", status:"Available", img:"https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&q=80&w=400" },
+  { title:"Zero to One", author:"Peter Thiel", category:"Teknologi", status:"Available", img:"https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=400" },
+  { title:"1984", author:"George Orwell", category:"Fiksi", status:"Borrowed", img:"https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&q=80&w=400" },
+  { title:"Homo Deus", author:"Yuval Noah Harari", category:"Sejarah", status:"Available", img:"https://images.unsplash.com/photo-1462275646964-a0e3386b89fa?auto=format&fit=crop&q=80&w=400" },
+];
+
+let extraLoaded = false;
+let currentCat = 'Semua';
+let currentView = 'grid';
+
+function applyFilters() {
+  const q = document.getElementById('search-input').value.toLowerCase();
+  const cat = document.getElementById('sel-category').value;
+  const status = document.getElementById('sel-status').value;
+  const sort = document.getElementById('sel-sort').value;
+
+  let pool = extraLoaded ? [...allBooks, ...extraBooks] : [...allBooks];
+
+  if (currentCat !== 'Semua') pool = pool.filter(b => b.category === currentCat);
+  if (cat !== 'Semua') pool = pool.filter(b => b.category === cat);
+  if (status !== 'Semua') pool = pool.filter(b => b.status === status);
+  if (q) pool = pool.filter(b => b.title.toLowerCase().includes(q) || b.author.toLowerCase().includes(q));
+  if (sort === 'az') pool.sort((a,b) => a.title.localeCompare(b.title));
+  else if (sort === 'za') pool.sort((a,b) => b.title.localeCompare(a.title));
+  else if (sort === 'available') pool.sort((a,b) => (a.status === 'Available' ? -1 : 1));
+
+  document.getElementById('result-info').textContent = `Menampilkan ${pool.length} buku`;
+  renderCatalog(pool);
+}
+
+function renderCatalog(books) {
+  const grid = document.getElementById('catalog-grid');
+  const noResult = document.getElementById('no-result');
+  grid.innerHTML = '';
+  noResult.classList.add('hidden');
+
+  if (!books.length) { noResult.classList.remove('hidden'); return; }
+
+  const isGrid = currentView === 'grid';
+
+  if (isGrid) {
+    grid.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-lg';
+  } else {
+    grid.className = 'flex flex-col gap-md';
+  }
+
+  books.forEach(book => {
+    const avail = book.status === 'Available';
+    if (isGrid) {
+      grid.insertAdjacentHTML('beforeend', `
+        <div class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col h-full group">
+          <div class="relative w-full aspect-[4/3] rounded-lg overflow-hidden mb-md">
+            <img src="${book.img}" alt="${book.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+            <div class="absolute top-2 right-2">
+              <span class="${avail ? 'bg-secondary-container text-on-secondary-container' : 'bg-surface-container-highest text-on-surface-variant'} px-2 py-0.5 rounded-full text-xs font-bold shadow-sm">
+                ${avail ? 'Tersedia' : 'Dipinjam'}
+              </span>
+            </div>
+          </div>
+          <div class="flex-grow">
+            <span class="text-xs font-label-sm text-primary uppercase tracking-wider mb-1 block">${book.category}</span>
+            <h3 class="font-body-md font-bold text-on-surface line-clamp-2 mb-1">${book.title}</h3>
+            <p class="text-on-surface-variant font-body-sm mb-md">${book.author}</p>
+          </div>
+          <button onclick="${avail ? `openBorrowModal('${book.title.replace(/'/g,"\\'")}','${book.author.replace(/'/g,"\\'")}')` : ''}"
+            class="w-full py-2 px-4 ${avail ? 'bg-secondary text-white hover:bg-on-secondary-fixed-variant cursor-pointer' : 'bg-surface-container text-outline cursor-not-allowed'} rounded-lg font-label-md transition-colors flex items-center justify-center gap-2 active:scale-95"
+            ${avail ? '' : 'disabled'}>
+            <span class="material-symbols-outlined text-[18px]">bookmark_add</span>
+            ${avail ? 'Pinjam' : 'Tidak Tersedia'}
+          </button>
+        </div>
+      `);
+    } else {
+      grid.insertAdjacentHTML('beforeend', `
+        <div class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl shadow-sm hover:shadow-md transition-all flex items-center gap-md group">
+          <img src="${book.img}" alt="${book.title}" class="w-16 h-20 object-cover rounded-lg flex-shrink-0 shadow-sm group-hover:scale-105 transition-transform duration-300">
+          <div class="flex-1 min-w-0">
+            <span class="text-xs font-label-sm text-primary uppercase tracking-wider">${book.category}</span>
+            <h3 class="font-body-md font-bold text-on-surface line-clamp-1">${book.title}</h3>
+            <p class="text-on-surface-variant font-body-sm">${book.author}</p>
+          </div>
+          <div class="flex items-center gap-sm flex-shrink-0">
+            <span class="${avail ? 'bg-secondary-container text-on-secondary-container' : 'bg-surface-container-highest text-on-surface-variant'} px-sm py-xs rounded-full font-label-sm hidden sm:block">
+              ${avail ? 'Tersedia' : 'Dipinjam'}
+            </span>
+            <button onclick="${avail ? `openBorrowModal('${book.title.replace(/'/g,"\\'")}','${book.author.replace(/'/g,"\\'")}')` : ''}"
+              class="py-2 px-md ${avail ? 'bg-secondary text-white hover:bg-on-secondary-fixed-variant cursor-pointer' : 'bg-surface-container text-outline cursor-not-allowed'} rounded-lg font-label-md transition-colors flex items-center gap-1 active:scale-95 whitespace-nowrap"
+              ${avail ? '' : 'disabled'}>
+              <span class="material-symbols-outlined text-[16px]">bookmark_add</span>
+              <span class="hidden sm:inline">${avail ? 'Pinjam' : 'N/A'}</span>
+            </button>
+          </div>
+        </div>
+      `);
+    }
+  });
+}
+
+function setChip(cat, btn) {
+  currentCat = cat;
+  document.querySelectorAll('.chip-btn').forEach(b => {
+    b.classList.remove('bg-primary','text-white');
+    b.classList.add('bg-surface-container-high','text-on-surface-variant');
+  });
+  btn.classList.add('bg-primary','text-white');
+  btn.classList.remove('bg-surface-container-high','text-on-surface-variant');
+  // sync dropdown
+  document.getElementById('sel-category').value = cat;
+  applyFilters();
+}
+
+function setView(v) {
+  currentView = v;
+  document.getElementById('btn-grid').className = `p-2 rounded-lg transition-colors ${v==='grid' ? 'bg-primary text-white' : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-variant'}`;
+  document.getElementById('btn-list').className = `p-2 rounded-lg transition-colors ${v==='list' ? 'bg-primary text-white' : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-variant'}`;
+  applyFilters();
+}
+
+function toggleFilter() {
+  document.getElementById('filter-panel').classList.toggle('show');
+}
+
+function resetFilter() {
+  currentCat = 'Semua';
+  document.getElementById('search-input').value = '';
+  document.getElementById('sel-category').value = 'Semua';
+  document.getElementById('sel-status').value = 'Semua';
+  document.getElementById('sel-sort').value = 'default';
+  document.querySelectorAll('.chip-btn').forEach(b => {
+    b.classList.remove('bg-primary','text-white');
+    b.classList.add('bg-surface-container-high','text-on-surface-variant');
+  });
+  document.querySelector('.chip-btn[data-cat="Semua"]').classList.add('bg-primary','text-white');
+  document.querySelector('.chip-btn[data-cat="Semua"]').classList.remove('bg-surface-container-high','text-on-surface-variant');
+  applyFilters();
+}
+
+function loadMore() {
+  if (!extraLoaded) {
+    extraLoaded = true;
+    applyFilters();
+    const btn = document.getElementById('load-more-btn');
+    btn.textContent = 'Semua buku sudah dimuat';
+    btn.disabled = true;
+    btn.classList.add('opacity-50','cursor-not-allowed');
+  }
+}
+
+function openBorrowModal(title, author) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-author').textContent = author;
+  document.getElementById('borrow-modal').classList.add('show');
+  document.getElementById('overlay').style.opacity = '1';
+  document.getElementById('overlay').style.pointerEvents = 'auto';
+}
+function closeBorrowModal() {
+  document.getElementById('borrow-modal').classList.remove('show');
+  closeAll();
+}
+function confirmBorrow() {
+  const title = document.getElementById('modal-title').textContent;
+  closeBorrowModal();
+  showToast(`"${title}" berhasil dipinjam!`);
+}
+function closeAll() {
+  document.getElementById('overlay').style.opacity = '0';
+  document.getElementById('overlay').style.pointerEvents = 'none';
+  document.getElementById('borrow-modal').classList.remove('show');
+}
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.style.cssText = 'position:fixed;bottom:88px;left:50%;transform:translateX(-50%);background:#191c1e;color:#eff1f3;padding:10px 20px;border-radius:999px;z-index:99;font-size:14px;display:flex;align-items:center;gap:8px;white-space:nowrap;';
+  t.innerHTML = `<span class="material-symbols-outlined" style="font-size:16px;color:#6df5e1">check_circle</span>${msg}`;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+applyFilters();
+</script>
+</body>
+</html>
