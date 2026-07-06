@@ -22,19 +22,21 @@
 </script>
 </head>
 <body class="bg-surface text-on-surface font-body-md">
+<script>window.ATHENAEUM_ALLOWED_ROLES = ['member'];</script>
+<script src="auth-guard.js"></script>
 
 <header class="bg-surface shadow-sm fixed top-0 w-full z-30">
   <div class="flex justify-between items-center w-full px-lg max-w-container-max mx-auto h-16">
     <div class="flex items-center gap-md">
-      <a href="katalog.html" class="material-symbols-outlined text-primary hover:bg-surface-container p-1 rounded-lg transition-colors">arrow_back</a>
+      <a href="catalog.html" class="material-symbols-outlined text-primary hover:bg-surface-container p-1 rounded-lg transition-colors">arrow_back</a>
       <h1 class="font-headline-md text-headline-md font-bold text-primary">Riwayat Pinjam</h1>
     </div>
     <nav class="hidden md:flex gap-xl items-center">
-      <a class="text-on-surface-variant hover:text-primary transition-colors" href="katalog.html">Dashboard</a>
-      <a class="text-on-surface-variant hover:text-primary transition-colors" href="katalog.html">Catalog</a>
+      <a class="text-on-surface-variant hover:text-primary transition-colors" href="catalog.html">Dashboard</a>
+      <a class="text-on-surface-variant hover:text-primary transition-colors" href="catalog.html">Catalog</a>
       <a class="text-on-surface-variant hover:text-primary transition-colors" href="profil.html">Profile</a>
     </nav>
-    <a href="index.html" class="material-symbols-outlined text-on-surface-variant hover:text-error transition-colors">logout</a>
+    <a href="#" onclick="logoutUser(); return false;" class="material-symbols-outlined text-on-surface-variant hover:text-error transition-colors">logout</a>
   </div>
 </header>
 
@@ -51,15 +53,15 @@
   <!-- Summary -->
   <div class="grid grid-cols-3 gap-md mb-xl">
     <div class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl text-center">
-      <p class="font-headline-md text-headline-md text-primary">47</p>
+      <p class="font-headline-md text-headline-md text-primary" id="sum-total">-</p>
       <p class="font-label-sm text-on-surface-variant">Total Pinjam</p>
     </div>
     <div class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl text-center">
-      <p class="font-headline-md text-headline-md text-secondary">4</p>
+      <p class="font-headline-md text-headline-md text-secondary" id="sum-aktif">-</p>
       <p class="font-label-sm text-on-surface-variant">Aktif</p>
     </div>
     <div class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl text-center">
-      <p class="font-headline-md text-headline-md text-error">1</p>
+      <p class="font-headline-md text-headline-md text-error" id="sum-overdue">-</p>
       <p class="font-label-sm text-on-surface-variant">Overdue</p>
     </div>
   </div>
@@ -69,10 +71,10 @@
 </main>
 
 <nav class="md:hidden fixed bottom-0 left-0 w-full z-30 flex justify-around items-center py-2 bg-surface border-t border-outline-variant">
-  <a class="flex flex-col items-center text-on-surface-variant" href="katalog.html">
+  <a class="flex flex-col items-center text-on-surface-variant" href="catalog.html">
     <span class="material-symbols-outlined">dashboard</span><span class="font-label-sm text-[10px]">Dashboard</span>
   </a>
-  <a class="flex flex-col items-center text-on-surface-variant" href="katalog.html">
+  <a class="flex flex-col items-center text-on-surface-variant" href="catalog.html">
     <span class="material-symbols-outlined">auto_stories</span><span class="font-label-sm text-[10px]">Catalog</span>
   </a>
   <a class="flex flex-col items-center text-on-surface-variant" href="profil.html">
@@ -81,69 +83,144 @@
 </nav>
 
 <script>
-const riwayatData = [
-  { id:'RW001', judul:'Sapiens: A Brief History', pengarang:'Yuval Noah Harari', tglPinjam:'10 Okt 2024', tglKembali:'24 Okt 2024', status:'overdue', cover:'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=80' },
-  { id:'RW002', judul:'Thinking, Fast and Slow', pengarang:'Daniel Kahneman', tglPinjam:'08 Okt 2024', tglKembali:'22 Okt 2024', status:'dipinjam', cover:'https://images.unsplash.com/photo-1532012197267-da84d127e765?auto=format&fit=crop&q=80&w=80' },
-  { id:'RW003', judul:'The Great Gatsby', pengarang:'F. Scott Fitzgerald', tglPinjam:'05 Okt 2024', tglKembali:'19 Okt 2024', status:'dipinjam', cover:'https://images.unsplash.com/photo-1541963463532-d68292c34b19?auto=format&fit=crop&q=80&w=80' },
-  { id:'RW004', judul:'A Promised Land', pengarang:'Barack Obama', tglPinjam:'02 Okt 2024', tglKembali:'16 Okt 2024', status:'dipinjam', cover:'https://images.unsplash.com/photo-1589998059171-988d887df646?auto=format&fit=crop&q=80&w=80' },
-  { id:'RW005', judul:'Clean Code', pengarang:'Robert C. Martin', tglPinjam:'18 Sep 2024', tglKembali:'02 Okt 2024', status:'dikembalikan', cover:'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=80' },
-  { id:'RW006', judul:'Design for the Real World', pengarang:'Victor Papanek', tglPinjam:'01 Sep 2024', tglKembali:'15 Sep 2024', status:'dikembalikan', cover:'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=80' },
-  { id:'RW007', judul:'Dune', pengarang:'Frank Herbert', tglPinjam:'10 Ags 2024', tglKembali:'24 Ags 2024', status:'dikembalikan', cover:'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=80' },
-];
+  // ===== KONFIGURASI API =====
+  // Sesuaikan path endpoint riwayat pinjam dengan backend kamu.
+  // Diasumsikan mengembalikan array seluruh riwayat peminjaman user yang login,
+  // baik yang masih dipinjam, overdue, maupun yang sudah dikembalikan.
+  const API_BASE_URL = 'http://localhost:5000/api';
+  const token = localStorage.getItem('athenaeum_token');
 
-const statusConfig = {
-  dipinjam: { label:'Dipinjam', cls:'bg-primary-container text-on-primary-container' },
-  dikembalikan: { label:'Dikembalikan', cls:'bg-secondary-container text-on-secondary-container' },
-  overdue: { label:'Overdue', cls:'bg-error-container text-on-error-container' },
-};
+  const statusConfig = {
+    dipinjam: { label:'Dipinjam', cls:'bg-primary-container text-on-primary-container' },
+    dikembalikan: { label:'Dikembalikan', cls:'bg-secondary-container text-on-secondary-container' },
+    overdue: { label:'Overdue', cls:'bg-error-container text-on-error-container' },
+  };
 
-let currentTab = 'semua';
+  let riwayatData = [];
+  let currentTab = 'semua';
 
-function renderRiwayat(data) {
-  const list = document.getElementById('riwayat-list');
-  list.innerHTML = '';
-  if (!data.length) {
-    list.innerHTML = '<div class="text-center py-xl"><span class="material-symbols-outlined text-[48px] text-outline">inbox</span><p class="text-on-surface-variant mt-md">Tidak ada data riwayat.</p></div>';
-    return;
+  function formatTanggal(iso) {
+    if (!iso) return '-';
+    const d = new Date(iso);
+    if (isNaN(d)) return iso;
+    return d.toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' });
   }
-  data.forEach(item => {
-    const s = statusConfig[item.status];
-    const isOverdue = item.status === 'overdue';
-    list.insertAdjacentHTML('beforeend', `
-      <div class="bg-surface-container-lowest border ${isOverdue ? 'border-error/40' : 'border-outline-variant'} rounded-xl p-md shadow-sm flex items-start gap-md hover:shadow-md transition-shadow">
-        <img src="${item.cover}" alt="${item.judul}" class="w-14 h-20 object-cover rounded-lg flex-shrink-0 shadow-sm"/>
-        <div class="flex-1 min-w-0">
-          <div class="flex items-start justify-between gap-sm">
-            <div>
-              <h4 class="font-body-md font-bold text-on-surface line-clamp-1">${item.judul}</h4>
-              <p class="font-body-sm text-on-surface-variant">${item.pengarang}</p>
+
+  // Normalisasi 1 record dari API jadi bentuk yang dipakai UI di halaman ini
+  function normalizeLoan(item) {
+    let status = item.status;
+    const now = new Date();
+    const due = new Date(item.dueDate);
+
+    if (!status) {
+      if (item.returnedAt) status = 'dikembalikan';
+      else if (!isNaN(due) && due < now) status = 'overdue';
+      else status = 'dipinjam';
+    }
+
+    return {
+      id: item.id || item._id,
+      judul: item.title || item.bookTitle || item.book?.title || 'Tanpa judul',
+      pengarang: item.author || item.book?.author || '-',
+      tglPinjam: formatTanggal(item.borrowedAt || item.borrowDate),
+      tglKembali: formatTanggal(item.returnedAt || item.dueDate),
+      status,
+      cover: item.cover || item.book?.img || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=80',
+    };
+  }
+
+  async function fetchRiwayat() {
+    const list = document.getElementById('riwayat-list');
+    list.innerHTML = `<div class="text-center py-xl text-on-surface-variant">
+      <span class="material-symbols-outlined text-[40px] animate-spin">sync</span>
+      <p class="mt-md font-body-md">Memuat riwayat peminjaman...</p>
+    </div>`;
+
+    if (!token) {
+      list.innerHTML = `<div class="text-center py-xl text-on-surface-variant">
+        <p class="font-body-md">Silakan login untuk melihat riwayat peminjaman kamu.</p>
+      </div>`;
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/books/my-loans/history`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('Gagal memuat riwayat');
+      const data = await res.json();
+      riwayatData = data.map(normalizeLoan);
+      updateSummary();
+      renderRiwayat(riwayatData);
+    } catch (err) {
+      console.error(err);
+      list.innerHTML = `<div class="text-center py-xl text-error">
+        <span class="material-symbols-outlined text-[48px]">cloud_off</span>
+        <p class="mt-md font-body-md">Gagal memuat riwayat. Pastikan backend jalan di ${API_BASE_URL}</p>
+      </div>`;
+    }
+  }
+
+  function updateSummary() {
+    const total = riwayatData.length;
+    const aktif = riwayatData.filter(r => r.status === 'dipinjam' || r.status === 'overdue').length;
+    const overdue = riwayatData.filter(r => r.status === 'overdue').length;
+    document.getElementById('sum-total').textContent = total;
+    document.getElementById('sum-aktif').textContent = aktif;
+    document.getElementById('sum-overdue').textContent = overdue;
+  }
+
+  function renderRiwayat(data) {
+    const list = document.getElementById('riwayat-list');
+    list.innerHTML = '';
+    if (!data.length) {
+      list.innerHTML = '<div class="text-center py-xl"><span class="material-symbols-outlined text-[48px] text-outline">inbox</span><p class="text-on-surface-variant mt-md">Tidak ada data riwayat.</p></div>';
+      return;
+    }
+    data.forEach(item => {
+      const s = statusConfig[item.status];
+      const isOverdue = item.status === 'overdue';
+      list.insertAdjacentHTML('beforeend', `
+        <div class="bg-surface-container-lowest border ${isOverdue ? 'border-error/40' : 'border-outline-variant'} rounded-xl p-md shadow-sm flex items-start gap-md hover:shadow-md transition-shadow">
+          <img src="${item.cover}" alt="${item.judul}" class="w-14 h-20 object-cover rounded-lg flex-shrink-0 shadow-sm"/>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-start justify-between gap-sm">
+              <div>
+                <h4 class="font-body-md font-bold text-on-surface line-clamp-1">${item.judul}</h4>
+                <p class="font-body-sm text-on-surface-variant">${item.pengarang}</p>
+              </div>
+              <span class="px-sm py-xs rounded-full font-label-sm whitespace-nowrap flex-shrink-0 ${s.cls}">${s.label}</span>
             </div>
-            <span class="px-sm py-xs rounded-full font-label-sm whitespace-nowrap flex-shrink-0 ${s.cls}">${s.label}</span>
+            <div class="mt-sm flex flex-wrap gap-md text-label-sm text-on-surface-variant">
+              <span class="flex items-center gap-xs"><span class="material-symbols-outlined text-[14px]">calendar_today</span> Pinjam: ${item.tglPinjam}</span>
+              <span class="flex items-center gap-xs"><span class="material-symbols-outlined text-[14px]">${item.status === 'dikembalikan' ? 'event_available' : 'event_busy'}</span> Kembali: ${item.tglKembali}</span>
+            </div>
+            ${isOverdue ? `<div class="mt-sm flex items-center gap-xs text-error font-label-sm"><span class="material-symbols-outlined text-[14px]">report</span> Terlambat — silakan kembalikan segera</div>` : ''}
           </div>
-          <div class="mt-sm flex flex-wrap gap-md text-label-sm text-on-surface-variant">
-            <span class="flex items-center gap-xs"><span class="material-symbols-outlined text-[14px]">calendar_today</span> Pinjam: ${item.tglPinjam}</span>
-            <span class="flex items-center gap-xs"><span class="material-symbols-outlined text-[14px]">${item.status === 'dikembalikan' ? 'event_available' : 'event_busy'}</span> Kembali: ${item.tglKembali}</span>
-          </div>
-          ${isOverdue ? `<div class="mt-sm flex items-center gap-xs text-error font-label-sm"><span class="material-symbols-outlined text-[14px]">report</span> Terlambat — silakan kembalikan segera</div>` : ''}
         </div>
-      </div>
-    `);
-  });
-}
+      `);
+    });
+  }
 
-function filterRiwayat(tab, btn) {
-  currentTab = tab;
-  document.querySelectorAll('.tab-btn').forEach(b => {
-    b.classList.remove('bg-primary','text-white');
-    b.classList.add('bg-surface-container-high','text-on-surface-variant');
-  });
-  btn.classList.add('bg-primary','text-white');
-  btn.classList.remove('bg-surface-container-high','text-on-surface-variant');
-  const filtered = tab === 'semua' ? riwayatData : riwayatData.filter(r => r.status === tab);
-  renderRiwayat(filtered);
-}
+  function filterRiwayat(tab, btn) {
+    currentTab = tab;
+    document.querySelectorAll('.tab-btn').forEach(b => {
+      b.classList.remove('bg-primary','text-white');
+      b.classList.add('bg-surface-container-high','text-on-surface-variant');
+    });
+    btn.classList.add('bg-primary','text-white');
+    btn.classList.remove('bg-surface-container-high','text-on-surface-variant');
+    const filtered = tab === 'semua' ? riwayatData : riwayatData.filter(r => r.status === tab);
+    renderRiwayat(filtered);
+  }
 
-renderRiwayat(riwayatData);
+  function logoutUser() {
+    localStorage.removeItem('athenaeum_current_user');
+    localStorage.removeItem('athenaeum_token');
+    window.location.href = 'index.html';
+  }
+
+  fetchRiwayat();
 </script>
 </body>
 </html>

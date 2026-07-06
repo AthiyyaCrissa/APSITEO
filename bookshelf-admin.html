@@ -157,6 +157,10 @@
         </select>
       </div>
       <div>
+        <label class="font-label-md text-on-surface-variant block mb-xs">URL Gambar Sampul (opsional)</label>
+        <input id="input-img" type="text" placeholder="https://..." class="w-full border border-outline-variant rounded-lg py-2 px-md focus:ring-1 focus:ring-primary bg-white"/>
+      </div>
+      <div>
         <label class="font-label-md text-on-surface-variant block mb-xs">Status</label>
         <select id="input-status" class="w-full border border-outline-variant rounded-lg py-2 px-md focus:ring-1 focus:ring-primary bg-white">
           <option value="Available">Tersedia</option>
@@ -187,114 +191,165 @@
 </nav>
 
 <script>
-let dataBuku = [
-  { id:1, judul:"Design for the Real World", pengarang:"Victor Papanek", kategori:"Design", status:"Available" },
-  { id:2, judul:"Sapiens: A Brief History", pengarang:"Yuval Noah Harari", kategori:"Sejarah", status:"Borrowed" },
-  { id:3, judul:"Thinking, Fast and Slow", pengarang:"Daniel Kahneman", kategori:"Sains", status:"Available" },
-  { id:4, judul:"The Great Gatsby", pengarang:"F. Scott Fitzgerald", kategori:"Fiksi", status:"Available" },
-  { id:5, judul:"Clean Code", pengarang:"Robert C. Martin", kategori:"Teknologi", status:"Available" },
-  { id:6, judul:"The Pragmatic Programmer", pengarang:"David Thomas", kategori:"Teknologi", status:"Borrowed" },
-  { id:7, judul:"Dune", pengarang:"Frank Herbert", kategori:"Fiksi", status:"Available" },
-  { id:8, judul:"Sejarah Indonesia Modern", pengarang:"M.C. Ricklefs", kategori:"Sejarah", status:"Available" },
-  { id:9, judul:"Atomic Habits", pengarang:"James Clear", kategori:"Sains", status:"Available" },
-  { id:10, judul:"A Promised Land", pengarang:"Barack Obama", kategori:"Biography", status:"Available" },
-];
-let idEdit = null;
+  // ===== KONFIGURASI API =====
+  const API_BASE_URL = 'http://localhost:5000/api';
+  const token = localStorage.getItem('athenaeum_token');
 
-function renderBuku() {
-  const q = document.getElementById('search-input').value.toLowerCase();
-  const kat = document.getElementById('filter-kategori').value;
-  const sts = document.getElementById('filter-status').value;
-  let hasil = dataBuku.filter(b => {
-    return (!q || b.judul.toLowerCase().includes(q) || b.pengarang.toLowerCase().includes(q))
-      && (kat === 'Semua' || b.kategori === kat)
-      && (sts === 'Semua' || b.status === sts);
-  });
-  document.getElementById('info-jumlah').textContent = `Menampilkan ${hasil.length} dari ${dataBuku.length} buku`;
-  const tbody = document.getElementById('tabel-buku');
-  tbody.innerHTML = '';
-  if (!hasil.length) { document.getElementById('kosong').classList.remove('hidden'); return; }
-  document.getElementById('kosong').classList.add('hidden');
-  hasil.forEach(b => {
-    const avail = b.status === 'Available';
-    tbody.insertAdjacentHTML('beforeend', `
-      <tr class="hover:bg-surface-container-low transition-colors group">
-        <td class="px-lg py-md font-body-md font-semibold text-on-surface">${b.judul}</td>
-        <td class="px-lg py-md font-body-md text-on-surface-variant">${b.pengarang}</td>
-        <td class="px-lg py-md"><span class="bg-surface-container text-on-surface-variant px-sm py-xs rounded-full font-label-sm">${b.kategori}</span></td>
-        <td class="px-lg py-md">
-          <span class="flex items-center gap-sm">
-            <div class="w-2 h-2 rounded-full ${avail ? 'bg-secondary' : 'bg-error'}"></div>
-            <span class="font-label-sm font-semibold ${avail ? 'text-secondary' : 'text-error'}">${avail ? 'Tersedia' : 'Dipinjam'}</span>
-          </span>
-        </td>
-        <td class="px-lg py-md flex items-center gap-sm">
-          <button onclick="editBuku(${b.id})" class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">edit</button>
-          <button onclick="hapusBuku(${b.id})" class="material-symbols-outlined text-outline hover:text-error transition-colors">delete</button>
-        </td>
-      </tr>
-    `);
-  });
-}
+  let dataBuku = [];
+  let idEdit = null; // menyimpan _id (Mongo) saat proses edit
 
-function bukaTambahBuku() {
-  idEdit = null;
-  document.getElementById('modal-judul').textContent = 'Tambah Buku';
-  document.getElementById('input-judul').value = '';
-  document.getElementById('input-pengarang').value = '';
-  document.getElementById('input-kategori').value = 'Fiksi';
-  document.getElementById('input-status').value = 'Available';
-  document.getElementById('modal-buku').classList.add('show');
-}
-
-function editBuku(id) {
-  const buku = dataBuku.find(b => b.id === id);
-  if (!buku) return;
-  idEdit = id;
-  document.getElementById('modal-judul').textContent = 'Edit Buku';
-  document.getElementById('input-judul').value = buku.judul;
-  document.getElementById('input-pengarang').value = buku.pengarang;
-  document.getElementById('input-kategori').value = buku.kategori;
-  document.getElementById('input-status').value = buku.status;
-  document.getElementById('modal-buku').classList.add('show');
-}
-
-function simpanBuku() {
-  const judul = document.getElementById('input-judul').value.trim();
-  const pengarang = document.getElementById('input-pengarang').value.trim();
-  const kategori = document.getElementById('input-kategori').value;
-  const status = document.getElementById('input-status').value;
-  if (!judul || !pengarang) { alert('Judul dan pengarang wajib diisi.'); return; }
-  if (idEdit) {
-    const idx = dataBuku.findIndex(b => b.id === idEdit);
-    dataBuku[idx] = { id: idEdit, judul, pengarang, kategori, status };
-    tampilToast('Buku berhasil diperbarui!');
-  } else {
-    dataBuku.push({ id: Date.now(), judul, pengarang, kategori, status });
-    tampilToast('Buku berhasil ditambahkan!');
+  // ==== AMBIL DATA DARI BACKEND ====
+  async function fetchBuku() {
+    try {
+      const res = await fetch(`${API_BASE_URL}/books`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('Gagal memuat data buku.');
+      const books = await res.json();
+      // mapping field backend (title, author, category, img) -> field tampilan (judul, pengarang, kategori)
+      dataBuku = books.map(b => ({
+        _id: b._id,
+        judul: b.title,
+        pengarang: b.author,
+        kategori: b.category,
+        img: b.img || '',
+        status: b.status,
+      }));
+      renderBuku();
+    } catch (err) {
+      console.error(err);
+      tampilToast('Gagal memuat data buku. Pastikan backend jalan.');
+    }
   }
-  tutupModalBuku();
-  renderBuku();
-}
 
-function hapusBuku(id) {
-  if (!confirm('Yakin ingin menghapus buku ini?')) return;
-  dataBuku = dataBuku.filter(b => b.id !== id);
-  renderBuku();
-  tampilToast('Buku berhasil dihapus.');
-}
+  function renderBuku() {
+    const q = document.getElementById('search-input').value.toLowerCase();
+    const kat = document.getElementById('filter-kategori').value;
+    const sts = document.getElementById('filter-status').value;
+    let hasil = dataBuku.filter(b => {
+      return (!q || b.judul.toLowerCase().includes(q) || b.pengarang.toLowerCase().includes(q))
+        && (kat === 'Semua' || b.kategori === kat)
+        && (sts === 'Semua' || b.status === sts);
+    });
+    document.getElementById('info-jumlah').textContent = `Menampilkan ${hasil.length} dari ${dataBuku.length} buku`;
+    const tbody = document.getElementById('tabel-buku');
+    tbody.innerHTML = '';
+    if (!hasil.length) { document.getElementById('kosong').classList.remove('hidden'); return; }
+    document.getElementById('kosong').classList.add('hidden');
+    hasil.forEach(b => {
+      const avail = b.status === 'Available';
+      tbody.insertAdjacentHTML('beforeend', `
+        <tr class="hover:bg-surface-container-low transition-colors group">
+          <td class="px-lg py-md font-body-md font-semibold text-on-surface">${b.judul}</td>
+          <td class="px-lg py-md font-body-md text-on-surface-variant">${b.pengarang}</td>
+          <td class="px-lg py-md"><span class="bg-surface-container text-on-surface-variant px-sm py-xs rounded-full font-label-sm">${b.kategori}</span></td>
+          <td class="px-lg py-md">
+            <span class="flex items-center gap-sm">
+              <div class="w-2 h-2 rounded-full ${avail ? 'bg-secondary' : 'bg-error'}"></div>
+              <span class="font-label-sm font-semibold ${avail ? 'text-secondary' : 'text-error'}">${avail ? 'Tersedia' : 'Dipinjam'}</span>
+            </span>
+          </td>
+          <td class="px-lg py-md flex items-center gap-sm">
+            <button onclick="editBuku('${b._id}')" class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">edit</button>
+            <button onclick="hapusBuku('${b._id}')" class="material-symbols-outlined text-outline hover:text-error transition-colors">delete</button>
+          </td>
+        </tr>
+      `);
+    });
+  }
 
-function tutupModalBuku() { document.getElementById('modal-buku').classList.remove('show'); }
+  function bukaTambahBuku() {
+    idEdit = null;
+    document.getElementById('modal-judul').textContent = 'Tambah Buku';
+    document.getElementById('input-judul').value = '';
+    document.getElementById('input-pengarang').value = '';
+    document.getElementById('input-kategori').value = 'Fiksi';
+    document.getElementById('input-img').value = '';
+    document.getElementById('input-status').value = 'Available';
+    document.getElementById('modal-buku').classList.add('show');
+  }
 
-function tampilToast(msg) {
-  const t = document.createElement('div');
-  t.style.cssText = 'position:fixed;bottom:88px;left:50%;transform:translateX(-50%);background:#191c1e;color:#eff1f3;padding:10px 20px;border-radius:999px;z-index:99;font-size:14px;display:flex;align-items:center;gap:8px;white-space:nowrap;';
-  t.innerHTML = `<span class="material-symbols-outlined" style="font-size:16px;color:#6df5e1">check_circle</span>${msg}`;
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), 3000);
-}
+  function editBuku(_id) {
+    const buku = dataBuku.find(b => b._id === _id);
+    if (!buku) return;
+    idEdit = _id;
+    document.getElementById('modal-judul').textContent = 'Edit Buku';
+    document.getElementById('input-judul').value = buku.judul;
+    document.getElementById('input-pengarang').value = buku.pengarang;
+    document.getElementById('input-kategori').value = buku.kategori;
+    document.getElementById('input-img').value = buku.img;
+    document.getElementById('input-status').value = buku.status;
+    document.getElementById('modal-buku').classList.add('show');
+  }
 
-renderBuku();
+  // ==== SIMPAN (CREATE / UPDATE via API) ====
+  async function simpanBuku() {
+    const judul = document.getElementById('input-judul').value.trim();
+    const pengarang = document.getElementById('input-pengarang').value.trim();
+    const kategori = document.getElementById('input-kategori').value;
+    const img = document.getElementById('input-img').value.trim();
+    const status = document.getElementById('input-status').value;
+    if (!judul || !pengarang) { alert('Judul dan pengarang wajib diisi.'); return; }
+
+    // mapping balik ke field backend
+    const payload = { title: judul, author: pengarang, category: kategori, img, status };
+
+    try {
+      let res, data;
+      if (idEdit) {
+        res = await fetch(`${API_BASE_URL}/books/${idEdit}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify(payload)
+        });
+        data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Gagal memperbarui buku.');
+        tampilToast('Buku berhasil diperbarui!');
+      } else {
+        res = await fetch(`${API_BASE_URL}/books`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify(payload)
+        });
+        data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Gagal menambah buku.');
+        tampilToast('Buku berhasil ditambahkan!');
+      }
+      tutupModalBuku();
+      fetchBuku();
+    } catch (err) {
+      alert(err.message);
+    }
+  }
+
+  // ==== HAPUS (via API) ====
+  async function hapusBuku(_id) {
+    if (!confirm('Yakin ingin menghapus buku ini?')) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/books/${_id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Gagal menghapus buku.');
+      tampilToast('Buku berhasil dihapus.');
+      fetchBuku();
+    } catch (err) {
+      alert(err.message);
+    }
+  }
+
+  function tutupModalBuku() { document.getElementById('modal-buku').classList.remove('show'); }
+
+  function tampilToast(msg) {
+    const t = document.createElement('div');
+    t.style.cssText = 'position:fixed;bottom:88px;left:50%;transform:translateX(-50%);background:#191c1e;color:#eff1f3;padding:10px 20px;border-radius:999px;z-index:99;font-size:14px;display:flex;align-items:center;gap:8px;white-space:nowrap;';
+    t.innerHTML = `<span class="material-symbols-outlined" style="font-size:16px;color:#6df5e1">check_circle</span>${msg}`;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+  }
+
+  fetchBuku();
 </script>
 </body>
 </html>

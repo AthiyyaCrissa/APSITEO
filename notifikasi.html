@@ -22,6 +22,8 @@
 </script>
 </head>
 <body class="bg-surface text-on-surface font-body-md">
+<script>window.ATHENAEUM_ALLOWED_ROLES = ['member'];</script>
+<script src="auth-guard.js"></script>
 
 <header class="bg-surface shadow-sm fixed top-0 w-full z-30">
   <div class="flex justify-between items-center w-full px-lg max-w-container-max mx-auto h-16">
@@ -34,7 +36,7 @@
       <a class="text-on-surface-variant hover:text-primary transition-colors" href="katalog.html">Catalog</a>
       <a class="text-on-surface-variant hover:text-primary transition-colors" href="profil.html">Profile</a>
     </nav>
-    <a href="index.html" class="material-symbols-outlined text-on-surface-variant hover:text-error transition-colors">logout</a>
+    <a href="#" onclick="logoutUser(); return false;" class="material-symbols-outlined text-on-surface-variant hover:text-error transition-colors">logout</a>
   </div>
 </header>
 
@@ -47,7 +49,12 @@
     </button>
   </div>
 
-  <div id="notif-list" class="space-y-sm"></div>
+  <div id="notif-list" class="space-y-sm">
+    <div class="text-center py-xl text-on-surface-variant">
+      <span class="material-symbols-outlined text-[40px] animate-spin">sync</span>
+      <p class="mt-md font-body-md">Memuat notifikasi...</p>
+    </div>
+  </div>
 
 </main>
 
@@ -64,52 +71,152 @@
 </nav>
 
 <script>
-const notifData = [
-  { id:1, icon:'report', iconColor:'text-error', title:'Buku Overdue!', desc:'Sapiens sudah melewati batas tanggal kembali. Segera kembalikan untuk menghindari denda lebih lanjut.', waktu:'2 jam lalu', unread:true, link:'riwayat.html' },
-  { id:2, icon:'event_repeat', iconColor:'text-secondary', title:'Jatuh tempo 3 hari lagi', desc:'4 buku akan segera jatuh tempo pengembalian pada 24 Oktober 2024.', waktu:'1 hari lalu', unread:true, link:'riwayat.html' },
-  { id:3, icon:'bookmark_added', iconColor:'text-primary', title:'Buku tersedia', desc:'Future Narratives oleh Elena Rossi sudah tersedia untuk dipinjam.', waktu:'3 hari lalu', unread:false, link:'katalog.html' },
-  { id:4, icon:'payments', iconColor:'text-error', title:'Pengingat denda', desc:'Kamu masih memiliki denda sebesar Rp 12.500 yang belum dibayar.', waktu:'4 hari lalu', unread:false, link:'denda.html' },
-  { id:5, icon:'verified', iconColor:'text-secondary', title:'Peminjaman dikonfirmasi', desc:'Peminjaman buku "Thinking, Fast and Slow" telah dikonfirmasi oleh admin.', waktu:'8 Okt 2024', unread:false, link:'riwayat.html' },
-  { id:6, icon:'local_library', iconColor:'text-primary', title:'Selamat datang!', desc:'Keanggotaan Premium kamu berhasil diperbarui hingga 31 Desember 2025.', waktu:'1 Jan 2024', unread:false, link:'profil.html' },
-];
+  // ===== KONFIGURASI API =====
+  // Sesuaikan endpoint notifikasi dengan backend kamu:
+  // - GET  /notifications          -> daftar notifikasi milik user yang login
+  // - POST /notifications/read-all -> tandai semua sebagai sudah dibaca
+  // - POST /notifications/:id/read -> tandai satu notifikasi sebagai sudah dibaca
+  const API_BASE_URL = 'http://localhost:5000/api';
+  const token = localStorage.getItem('athenaeum_token');
 
-function renderNotif(data) {
-  const list = document.getElementById('notif-list');
-  list.innerHTML = '';
-  data.forEach(n => {
-    list.insertAdjacentHTML('beforeend', `
-      <a href="${n.link}" class="flex items-start gap-md p-md rounded-xl border ${n.unread ? 'bg-primary-fixed/20 border-primary/20' : 'bg-surface-container-lowest border-outline-variant'} hover:shadow-md transition-all block">
-        <div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center flex-shrink-0 mt-0.5">
-          <span class="material-symbols-outlined ${n.iconColor}">${n.icon}</span>
-        </div>
-        <div class="flex-1 min-w-0">
-          <div class="flex justify-between items-start gap-sm">
-            <p class="font-body-md font-bold text-on-surface ${n.unread ? '' : 'font-normal'}">${n.title}</p>
-            ${n.unread ? '<span class="w-2 h-2 rounded-full bg-primary flex-shrink-0 mt-2"></span>' : ''}
+  let notifData = [];
+
+  function formatWaktu(iso) {
+    if (!iso) return '-';
+    const d = new Date(iso);
+    if (isNaN(d)) return iso;
+    const diffMs = Date.now() - d.getTime();
+    const diffH = Math.floor(diffMs / (1000*60*60));
+    if (diffH < 1) return 'Baru saja';
+    if (diffH < 24) return `${diffH} jam lalu`;
+    const diffD = Math.floor(diffH / 24);
+    if (diffD < 7) return `${diffD} hari lalu`;
+    return d.toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' });
+  }
+
+  // Ikon default berdasarkan tipe notifikasi, dipakai kalau backend tidak
+  // mengirim field icon/iconColor secara eksplisit.
+  const iconByType = {
+    overdue: { icon:'report', color:'text-error' },
+    due_soon: { icon:'event_repeat', color:'text-secondary' },
+    book_available: { icon:'bookmark_added', color:'text-primary' },
+    fine: { icon:'payments', color:'text-error' },
+    loan_confirmed: { icon:'verified', color:'text-secondary' },
+    membership: { icon:'local_library', color:'text-primary' },
+    default: { icon:'notifications', color:'text-on-surface-variant' },
+  };
+  const linkByType = {
+    overdue: 'riwayat.html',
+    due_soon: 'riwayat.html',
+    book_available: 'catalog.html',
+    fine: 'denda.html',
+    loan_confirmed: 'riwayat.html',
+    membership: 'profil.html',
+  };
+
+  function normalizeNotif(item) {
+    const meta = iconByType[item.type] || iconByType.default;
+    return {
+      id: item.id || item._id,
+      icon: item.icon || meta.icon,
+      iconColor: item.iconColor || meta.color,
+      title: item.title,
+      desc: item.message || item.desc || '',
+      waktu: formatWaktu(item.createdAt || item.time),
+      unread: item.read === false || item.unread === true,
+      link: item.link || linkByType[item.type] || '#',
+    };
+  }
+
+  async function fetchNotif() {
+    const list = document.getElementById('notif-list');
+    if (!token) {
+      list.innerHTML = `<div class="text-center py-xl text-on-surface-variant"><p>Silakan login untuk melihat notifikasi kamu.</p></div>`;
+      return;
+    }
+    try {
+      const res = await fetch(`${API_BASE_URL}/notifications`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('Gagal memuat notifikasi');
+      const data = await res.json();
+      notifData = data.map(normalizeNotif);
+      renderNotif(notifData);
+    } catch (err) {
+      console.error(err);
+      list.innerHTML = `<div class="text-center py-xl text-error"><span class="material-symbols-outlined text-[48px]">cloud_off</span><p class="mt-md">Gagal memuat notifikasi. Pastikan backend jalan di ${API_BASE_URL}</p></div>`;
+    }
+  }
+
+  function renderNotif(data) {
+    const list = document.getElementById('notif-list');
+    list.innerHTML = '';
+    if (!data.length) {
+      list.innerHTML = `<div class="text-center py-xl text-on-surface-variant"><span class="material-symbols-outlined text-[48px] text-outline">notifications_off</span><p class="mt-md">Belum ada notifikasi.</p></div>`;
+      return;
+    }
+    data.forEach(n => {
+      list.insertAdjacentHTML('beforeend', `
+        <a href="${n.link}" onclick="markOneRead('${n.id}')" class="flex items-start gap-md p-md rounded-xl border ${n.unread ? 'bg-primary-fixed/20 border-primary/20' : 'bg-surface-container-lowest border-outline-variant'} hover:shadow-md transition-all block">
+          <div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center flex-shrink-0 mt-0.5">
+            <span class="material-symbols-outlined ${n.iconColor}">${n.icon}</span>
           </div>
-          <p class="font-body-sm text-on-surface-variant mt-xs">${n.desc}</p>
-          <p class="font-label-sm text-outline mt-xs">${n.waktu}</p>
-        </div>
-      </a>
-    `);
-  });
-}
+          <div class="flex-1 min-w-0">
+            <div class="flex justify-between items-start gap-sm">
+              <p class="font-body-md font-bold text-on-surface ${n.unread ? '' : 'font-normal'}">${n.title}</p>
+              ${n.unread ? '<span class="w-2 h-2 rounded-full bg-primary flex-shrink-0 mt-2"></span>' : ''}
+            </div>
+            <p class="font-body-sm text-on-surface-variant mt-xs">${n.desc}</p>
+            <p class="font-label-sm text-outline mt-xs">${n.waktu}</p>
+          </div>
+        </a>
+      `);
+    });
+  }
 
-function markAllRead() {
-  notifData.forEach(n => n.unread = false);
-  renderNotif(notifData);
-  showToast('Semua notifikasi ditandai dibaca');
-}
+  async function markAllRead() {
+    if (!token) return;
+    notifData.forEach(n => n.unread = false);
+    renderNotif(notifData);
+    showToast('Semua notifikasi ditandai dibaca');
+    try {
+      await fetch(`${API_BASE_URL}/notifications/read-all`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+    } catch (err) {
+      console.error('Gagal menandai semua notifikasi sebagai dibaca:', err);
+    }
+  }
 
-function showToast(msg) {
-  const t = document.createElement('div');
-  t.style.cssText = 'position:fixed;bottom:88px;left:50%;transform:translateX(-50%);background:#191c1e;color:#eff1f3;padding:10px 20px;border-radius:999px;z-index:99;font-size:14px;';
-  t.textContent = msg;
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), 3000);
-}
+  async function markOneRead(id) {
+    const n = notifData.find(x => x.id === id);
+    if (n) n.unread = false;
+    try {
+      await fetch(`${API_BASE_URL}/notifications/${id}/read`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+    } catch (err) {
+      console.error('Gagal menandai notifikasi sebagai dibaca:', err);
+    }
+  }
 
-renderNotif(notifData);
+  function logoutUser() {
+    localStorage.removeItem('athenaeum_current_user');
+    localStorage.removeItem('athenaeum_token');
+    window.location.href = 'index.html';
+  }
+
+  function showToast(msg) {
+    const t = document.createElement('div');
+    t.style.cssText = 'position:fixed;bottom:88px;left:50%;transform:translateX(-50%);background:#191c1e;color:#eff1f3;padding:10px 20px;border-radius:999px;z-index:99;font-size:14px;';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+  }
+
+  fetchNotif();
 </script>
 </body>
 </html>

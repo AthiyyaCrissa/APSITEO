@@ -24,19 +24,21 @@
 </script>
 </head>
 <body class="bg-surface text-on-surface font-body-md">
+<script>window.ATHENAEUM_ALLOWED_ROLES = ['member'];</script>
+<script src="auth-guard.js"></script>
 
 <header class="bg-surface shadow-sm fixed top-0 w-full z-30">
   <div class="flex justify-between items-center w-full px-lg max-w-container-max mx-auto h-16">
     <div class="flex items-center gap-md">
-      <a href="katalog.html" class="material-symbols-outlined text-primary hover:bg-surface-container p-1 rounded-lg transition-colors">arrow_back</a>
+      <a href="catalog.html" class="material-symbols-outlined text-primary hover:bg-surface-container p-1 rounded-lg transition-colors">arrow_back</a>
       <h1 class="font-headline-md text-headline-md font-bold text-primary">Denda Saya</h1>
     </div>
     <nav class="hidden md:flex gap-xl items-center">
-      <a class="text-on-surface-variant hover:text-primary transition-colors" href="katalog.html">Dashboard</a>
-      <a class="text-on-surface-variant hover:text-primary transition-colors" href="katalog.html">Catalog</a>
+      <a class="text-on-surface-variant hover:text-primary transition-colors" href="catalog.html">Dashboard</a>
+      <a class="text-on-surface-variant hover:text-primary transition-colors" href="catalog.html">Catalog</a>
       <a class="text-on-surface-variant hover:text-primary transition-colors" href="profil.html">Profile</a>
     </nav>
-    <a href="index.html" class="material-symbols-outlined text-on-surface-variant hover:text-error transition-colors">logout</a>
+    <a href="#" onclick="logoutUser(); return false;" class="material-symbols-outlined text-on-surface-variant hover:text-error transition-colors">logout</a>
   </div>
 </header>
 
@@ -50,11 +52,11 @@
       </div>
       <div>
         <p class="font-label-md text-on-error-container">Total Denda Aktif</p>
-        <h2 class="font-headline-lg text-headline-lg text-error" id="total-denda">Rp 12.500</h2>
-        <p class="font-body-sm text-on-error-container/70">1 item overdue · Denda Rp 1.000/hari</p>
+        <h2 class="font-headline-lg text-headline-lg text-error" id="total-denda">Rp 0</h2>
+        <p class="font-body-sm text-on-error-container/70" id="denda-subtitle">Memuat data denda...</p>
       </div>
     </div>
-    <button onclick="openPayModal()" class="flex items-center gap-sm bg-error text-white px-lg py-md rounded-lg font-label-md hover:bg-error/90 active:scale-95 transition-all shadow-md">
+    <button id="pay-btn" onclick="openPayModal()" class="hidden items-center gap-sm bg-error text-white px-lg py-md rounded-lg font-label-md hover:bg-error/90 active:scale-95 transition-all shadow-md">
       <span class="material-symbols-outlined text-[18px]">credit_card</span> Bayar Sekarang
     </button>
   </div>
@@ -62,23 +64,9 @@
   <!-- Denda Aktif -->
   <h3 class="font-headline-md text-headline-md text-on-surface mb-md">Denda Aktif</h3>
   <div class="space-y-md mb-xl" id="denda-aktif">
-    <div class="bg-surface-container-lowest border border-error/30 rounded-xl p-md shadow-sm flex items-start gap-md">
-      <img src="https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=80" alt="Sapiens" class="w-14 h-20 object-cover rounded-lg flex-shrink-0"/>
-      <div class="flex-1">
-        <div class="flex justify-between items-start">
-          <div>
-            <h4 class="font-body-md font-bold text-on-surface">Sapiens: A Brief History</h4>
-            <p class="font-body-sm text-on-surface-variant">Yuval Noah Harari</p>
-          </div>
-          <span class="bg-error-container text-on-error-container px-sm py-xs rounded-full font-label-sm">Overdue</span>
-        </div>
-        <div class="mt-sm grid grid-cols-2 gap-sm text-label-sm text-on-surface-variant">
-          <span><span class="material-symbols-outlined text-[14px]">calendar_today</span> Pinjam: 10 Okt 2024</span>
-          <span><span class="material-symbols-outlined text-[14px]">event_busy</span> Jatuh tempo: 24 Okt 2024</span>
-          <span class="text-error font-bold"><span class="material-symbols-outlined text-[14px]">schedule</span> Terlambat: 12 hari</span>
-          <span class="text-error font-bold"><span class="material-symbols-outlined text-[14px]">payments</span> Denda: Rp 12.000</span>
-        </div>
-      </div>
+    <div class="text-center py-lg text-on-surface-variant">
+      <span class="material-symbols-outlined text-[40px] animate-spin">sync</span>
+      <p class="mt-md font-body-md">Memuat denda aktif...</p>
     </div>
   </div>
 
@@ -94,24 +82,12 @@
           <th class="px-lg py-md font-label-sm text-on-surface-variant uppercase tracking-wider hidden md:table-cell">Status</th>
         </tr>
       </thead>
-      <tbody class="divide-y divide-outline-variant">
-        <tr class="hover:bg-surface-container transition-colors">
-          <td class="px-lg py-md font-body-md text-on-surface">Clean Code</td>
-          <td class="px-lg py-md font-body-md text-on-surface-variant hidden md:table-cell">05 Okt 2024</td>
-          <td class="px-lg py-md font-body-md text-on-surface font-bold">Rp 3.000</td>
-          <td class="px-lg py-md hidden md:table-cell"><span class="bg-secondary-container text-on-secondary-container px-sm py-xs rounded-full font-label-sm">Lunas</span></td>
-        </tr>
-        <tr class="hover:bg-surface-container transition-colors">
-          <td class="px-lg py-md font-body-md text-on-surface">Dune</td>
-          <td class="px-lg py-md font-body-md text-on-surface-variant hidden md:table-cell">28 Ags 2024</td>
-          <td class="px-lg py-md font-body-md text-on-surface font-bold">Rp 5.000</td>
-          <td class="px-lg py-md hidden md:table-cell"><span class="bg-secondary-container text-on-secondary-container px-sm py-xs rounded-full font-label-sm">Lunas</span></td>
-        </tr>
-        <tr class="hover:bg-surface-container transition-colors">
-          <td class="px-lg py-md font-body-md text-on-surface">The Alchemist</td>
-          <td class="px-lg py-md font-body-md text-on-surface-variant hidden md:table-cell">10 Jul 2024</td>
-          <td class="px-lg py-md font-body-md text-on-surface font-bold">Rp 2.000</td>
-          <td class="px-lg py-md hidden md:table-cell"><span class="bg-secondary-container text-on-secondary-container px-sm py-xs rounded-full font-label-sm">Lunas</span></td>
+      <tbody class="divide-y divide-outline-variant" id="riwayat-denda-body">
+        <tr>
+          <td colspan="4" class="text-center py-lg text-on-surface-variant">
+            <span class="material-symbols-outlined text-[32px] animate-spin align-middle">sync</span>
+            <span class="ml-sm">Memuat riwayat pembayaran...</span>
+          </td>
         </tr>
       </tbody>
     </table>
@@ -126,23 +102,12 @@
       <h3 class="font-headline-md text-headline-md text-on-surface">Konfirmasi Pembayaran</h3>
       <button onclick="closePayModal()" class="material-symbols-outlined text-on-surface-variant hover:text-error">close</button>
     </div>
-    <div class="bg-surface-container p-md rounded-xl mb-md space-y-sm">
-      <div class="flex justify-between font-body-sm">
-        <span class="text-on-surface-variant">Denda Sapiens</span>
-        <span class="font-bold">Rp 12.000</span>
-      </div>
-      <div class="flex justify-between font-body-sm">
-        <span class="text-on-surface-variant">Biaya Admin</span>
-        <span class="font-bold">Rp 500</span>
-      </div>
-      <div class="border-t border-outline-variant pt-sm flex justify-between font-body-md">
-        <span class="font-bold text-on-surface">Total</span>
-        <span class="font-bold text-error">Rp 12.500</span>
-      </div>
+    <div class="bg-surface-container p-md rounded-xl mb-md space-y-sm" id="pay-modal-detail">
+      <!-- diisi dinamis dari denda aktif -->
     </div>
     <div class="mb-md">
       <label class="font-label-md text-on-surface-variant block mb-xs">Metode Pembayaran</label>
-      <select class="w-full border border-outline-variant rounded-lg py-2 px-md bg-white focus:ring-1 focus:ring-primary">
+      <select id="pay-method" class="w-full border border-outline-variant rounded-lg py-2 px-md bg-white focus:ring-1 focus:ring-primary">
         <option>Transfer Bank</option>
         <option>QRIS</option>
         <option>Tunai di Kasir</option>
@@ -150,16 +115,16 @@
     </div>
     <div class="flex gap-sm">
       <button onclick="closePayModal()" class="flex-1 border border-outline-variant text-on-surface-variant py-3 rounded-lg font-label-md hover:bg-surface-container transition-colors">Batal</button>
-      <button onclick="confirmPay()" class="flex-1 bg-error text-white py-3 rounded-lg font-label-md hover:bg-error/90 active:scale-[0.98] transition-all">Bayar</button>
+      <button id="pay-confirm-btn" onclick="confirmPay()" class="flex-1 bg-error text-white py-3 rounded-lg font-label-md hover:bg-error/90 active:scale-[0.98] transition-all">Bayar</button>
     </div>
   </div>
 </div>
 
 <nav class="md:hidden fixed bottom-0 left-0 w-full z-30 flex justify-around items-center py-2 bg-surface border-t border-outline-variant">
-  <a class="flex flex-col items-center text-on-surface-variant" href="katalog.html">
+  <a class="flex flex-col items-center text-on-surface-variant" href="catalog.html">
     <span class="material-symbols-outlined">dashboard</span><span class="font-label-sm text-[10px]">Dashboard</span>
   </a>
-  <a class="flex flex-col items-center text-on-surface-variant" href="katalog.html">
+  <a class="flex flex-col items-center text-on-surface-variant" href="catalog.html">
     <span class="material-symbols-outlined">auto_stories</span><span class="font-label-sm text-[10px]">Catalog</span>
   </a>
   <a class="flex flex-col items-center text-on-surface-variant" href="profil.html">
@@ -168,13 +133,221 @@
 </nav>
 
 <script>
-  function openPayModal() { document.getElementById('pay-modal').classList.add('show'); }
-  function closePayModal() { document.getElementById('pay-modal').classList.remove('show'); }
-  function confirmPay() {
-    closePayModal();
-    document.getElementById('denda-aktif').innerHTML = '<div class="text-center py-xl"><span class="material-symbols-outlined text-[48px] text-secondary">check_circle</span><p class="text-on-surface font-bold mt-md">Pembayaran berhasil!</p><p class="text-on-surface-variant font-body-sm">Denda kamu sudah lunas.</p></div>';
-    document.getElementById('total-denda').textContent = 'Rp 0';
+  // ===== KONFIGURASI API =====
+  // Sesuaikan endpoint denda (fines) dengan backend kamu:
+  // - GET  /fines/active   -> daftar denda aktif milik user (dari buku yang telat dikembalikan)
+  // - GET  /fines/history  -> riwayat pembayaran denda yang sudah lunas
+  // - POST /fines/:id/pay  -> proses pembayaran 1 item denda
+  const API_BASE_URL = 'http://localhost:5000/api';
+  const token = localStorage.getItem('athenaeum_token');
+
+  const DENDA_PER_HARI = 1000;
+  const BIAYA_ADMIN = 500;
+
+  let dendaAktif = [];
+  let selectedDenda = null;
+
+  function formatRupiah(n) {
+    return 'Rp ' + (Number(n) || 0).toLocaleString('id-ID');
   }
+  function formatTanggal(iso) {
+    if (!iso) return '-';
+    const d = new Date(iso);
+    if (isNaN(d)) return iso;
+    return d.toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' });
+  }
+
+  async function fetchDenda() {
+    const aktifWrap = document.getElementById('denda-aktif');
+    if (!token) {
+      aktifWrap.innerHTML = `<div class="text-center py-lg text-on-surface-variant"><p>Silakan login untuk melihat denda kamu.</p></div>`;
+      document.getElementById('denda-subtitle').textContent = 'Belum login';
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/fines/active`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('Gagal memuat denda aktif');
+      const data = await res.json();
+
+      dendaAktif = data.map(item => {
+        const now = new Date();
+        const due = new Date(item.dueDate);
+        const terlambat = Math.max(Math.ceil((now - due) / (1000*60*60*24)), 0);
+        return {
+          id: item.id || item._id,
+          judul: item.title || item.bookTitle || item.book?.title || 'Tanpa judul',
+          cover: item.cover || item.book?.img || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=80',
+          tglPinjam: formatTanggal(item.borrowedAt || item.borrowDate),
+          tglJatuhTempo: formatTanggal(item.dueDate),
+          terlambatHari: item.overdueDays ?? terlambat,
+          denda: item.amount ?? (item.overdueDays ?? terlambat) * DENDA_PER_HARI,
+        };
+      });
+
+      renderDendaAktif();
+    } catch (err) {
+      console.error(err);
+      aktifWrap.innerHTML = `<div class="text-center py-lg text-error"><span class="material-symbols-outlined text-[40px]">cloud_off</span><p class="mt-md">Gagal memuat denda. Pastikan backend jalan di ${API_BASE_URL}</p></div>`;
+      document.getElementById('denda-subtitle').textContent = 'Gagal memuat data';
+    }
+  }
+
+  function renderDendaAktif() {
+    const wrap = document.getElementById('denda-aktif');
+    const totalBtn = document.getElementById('pay-btn');
+    const total = dendaAktif.reduce((sum, d) => sum + d.denda, 0);
+
+    document.getElementById('total-denda').textContent = formatRupiah(total);
+
+    if (dendaAktif.length === 0) {
+      document.getElementById('denda-subtitle').textContent = 'Tidak ada denda aktif. Kerja bagus!';
+      totalBtn.classList.add('hidden');
+      wrap.innerHTML = `<div class="text-center py-xl"><span class="material-symbols-outlined text-[48px] text-secondary">check_circle</span><p class="text-on-surface font-bold mt-md">Tidak ada denda aktif</p><p class="text-on-surface-variant font-body-sm">Semua buku kamu dalam kondisi aman.</p></div>`;
+      return;
+    }
+
+    document.getElementById('denda-subtitle').textContent = `${dendaAktif.length} item overdue · Denda ${formatRupiah(DENDA_PER_HARI)}/hari`;
+    totalBtn.classList.remove('hidden');
+    totalBtn.classList.add('flex');
+
+    wrap.innerHTML = '';
+    dendaAktif.forEach(item => {
+      wrap.insertAdjacentHTML('beforeend', `
+        <div class="bg-surface-container-lowest border border-error/30 rounded-xl p-md shadow-sm flex items-start gap-md">
+          <img src="${item.cover}" alt="${item.judul}" class="w-14 h-20 object-cover rounded-lg flex-shrink-0"/>
+          <div class="flex-1">
+            <div class="flex justify-between items-start">
+              <div>
+                <h4 class="font-body-md font-bold text-on-surface">${item.judul}</h4>
+              </div>
+              <span class="bg-error-container text-on-error-container px-sm py-xs rounded-full font-label-sm">Overdue</span>
+            </div>
+            <div class="mt-sm grid grid-cols-2 gap-sm text-label-sm text-on-surface-variant">
+              <span><span class="material-symbols-outlined text-[14px]">calendar_today</span> Pinjam: ${item.tglPinjam}</span>
+              <span><span class="material-symbols-outlined text-[14px]">event_busy</span> Jatuh tempo: ${item.tglJatuhTempo}</span>
+              <span class="text-error font-bold"><span class="material-symbols-outlined text-[14px]">schedule</span> Terlambat: ${item.terlambatHari} hari</span>
+              <span class="text-error font-bold"><span class="material-symbols-outlined text-[14px]">payments</span> Denda: ${formatRupiah(item.denda)}</span>
+            </div>
+          </div>
+        </div>
+      `);
+    });
+  }
+
+  async function fetchRiwayatDenda() {
+    const body = document.getElementById('riwayat-denda-body');
+    if (!token) {
+      body.innerHTML = `<tr><td colspan="4" class="text-center py-lg text-on-surface-variant">Silakan login untuk melihat riwayat pembayaran.</td></tr>`;
+      return;
+    }
+    try {
+      const res = await fetch(`${API_BASE_URL}/fines/history`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('Gagal memuat riwayat denda');
+      const data = await res.json();
+
+      if (!data.length) {
+        body.innerHTML = `<tr><td colspan="4" class="text-center py-lg text-on-surface-variant">Belum ada riwayat pembayaran.</td></tr>`;
+        return;
+      }
+
+      body.innerHTML = '';
+      data.forEach(item => {
+        body.insertAdjacentHTML('beforeend', `
+          <tr class="hover:bg-surface-container transition-colors">
+            <td class="px-lg py-md font-body-md text-on-surface">${item.title || item.bookTitle || '-'}</td>
+            <td class="px-lg py-md font-body-md text-on-surface-variant hidden md:table-cell">${formatTanggal(item.paidAt)}</td>
+            <td class="px-lg py-md font-body-md text-on-surface font-bold">${formatRupiah(item.amount)}</td>
+            <td class="px-lg py-md hidden md:table-cell"><span class="bg-secondary-container text-on-secondary-container px-sm py-xs rounded-full font-label-sm">Lunas</span></td>
+          </tr>
+        `);
+      });
+    } catch (err) {
+      console.error(err);
+      body.innerHTML = `<tr><td colspan="4" class="text-center py-lg text-error">Gagal memuat riwayat pembayaran.</td></tr>`;
+    }
+  }
+
+  function openPayModal() {
+    // Untuk saat ini modal menampilkan ringkasan seluruh denda aktif sekaligus.
+    const total = dendaAktif.reduce((sum, d) => sum + d.denda, 0);
+    const detailWrap = document.getElementById('pay-modal-detail');
+    detailWrap.innerHTML = '';
+    dendaAktif.forEach(item => {
+      detailWrap.insertAdjacentHTML('beforeend', `
+        <div class="flex justify-between font-body-sm">
+          <span class="text-on-surface-variant">Denda ${item.judul}</span>
+          <span class="font-bold">${formatRupiah(item.denda)}</span>
+        </div>`);
+    });
+    detailWrap.insertAdjacentHTML('beforeend', `
+      <div class="flex justify-between font-body-sm">
+        <span class="text-on-surface-variant">Biaya Admin</span>
+        <span class="font-bold">${formatRupiah(BIAYA_ADMIN)}</span>
+      </div>
+      <div class="border-t border-outline-variant pt-sm flex justify-between font-body-md">
+        <span class="font-bold text-on-surface">Total</span>
+        <span class="font-bold text-error">${formatRupiah(total + BIAYA_ADMIN)}</span>
+      </div>`);
+
+    document.getElementById('pay-modal').classList.add('show');
+  }
+  function closePayModal() { document.getElementById('pay-modal').classList.remove('show'); }
+
+  async function confirmPay() {
+    const btn = document.getElementById('pay-confirm-btn');
+    const original = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Memproses...';
+
+    const method = document.getElementById('pay-method').value;
+
+    try {
+      // Bayar semua item denda aktif satu per satu ke endpoint /fines/:id/pay
+      for (const item of dendaAktif) {
+        const res = await fetch(`${API_BASE_URL}/fines/${item.id}/pay`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ method })
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.message || `Gagal membayar denda untuk "${item.judul}"`);
+        }
+      }
+
+      closePayModal();
+      document.getElementById('denda-aktif').innerHTML = '<div class="text-center py-xl"><span class="material-symbols-outlined text-[48px] text-secondary">check_circle</span><p class="text-on-surface font-bold mt-md">Pembayaran berhasil!</p><p class="text-on-surface-variant font-body-sm">Denda kamu sudah lunas.</p></div>';
+      document.getElementById('total-denda').textContent = 'Rp 0';
+      document.getElementById('denda-subtitle').textContent = 'Tidak ada denda aktif';
+      document.getElementById('pay-btn').classList.add('hidden');
+      dendaAktif = [];
+
+      await fetchRiwayatDenda();
+    } catch (err) {
+      closePayModal();
+      alert('❌ ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = original;
+    }
+  }
+
+  function logoutUser() {
+    localStorage.removeItem('athenaeum_current_user');
+    localStorage.removeItem('athenaeum_token');
+    window.location.href = 'index.html';
+  }
+
+  fetchDenda();
+  fetchRiwayatDenda();
 </script>
 </body>
 </html>

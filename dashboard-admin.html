@@ -55,6 +55,8 @@
 </script>
 </head>
 <body class="bg-surface text-on-surface">
+<script>window.ATHENAEUM_ALLOWED_ROLES = ['admin'];</script>
+<script src="auth-guard.js"></script>
 
 <!-- Header -->
 <header class="bg-surface shadow-sm sticky top-0 z-40 h-16 flex justify-between items-center w-full px-lg max-w-container-max mx-auto">
@@ -63,8 +65,7 @@
     <h1 class="font-headline-md text-headline-md font-bold text-primary">Athenaeum Library</h1>
   </div>
   <div class="flex items-center gap-md">
-    </div>
-    <a class="material-symbols-outlined text-on-surface-variant hover:text-error transition-colors p-2" href="index.html" title="Logout">logout</a>
+    <a class="material-symbols-outlined text-on-surface-variant hover:text-error transition-colors p-2" href="#" onclick="logoutUser(); return false;" title="Logout">logout</a>
   </div>
 </header>
 
@@ -116,34 +117,30 @@
       <div class="stat-card bg-white p-lg rounded-xl border border-outline-variant shadow-[0_4px_12px_rgba(0,0,0,0.04)]">
         <div class="flex justify-between items-start mb-md">
           <div class="bg-primary-fixed p-sm rounded-lg"><span class="material-symbols-outlined text-primary">groups</span></div>
-          <span class="text-secondary font-bold text-label-sm">+12%</span>
         </div>
         <p class="font-label-md text-label-md text-on-surface-variant">Total Anggota</p>
-        <h3 class="font-headline-lg text-headline-lg text-primary mt-xs">1.284</h3>
+        <h3 class="font-headline-lg text-headline-lg text-primary mt-xs" id="stat-total-anggota">-</h3>
       </div>
       <div class="stat-card bg-white p-lg rounded-xl border border-outline-variant shadow-[0_4px_12px_rgba(0,0,0,0.04)]">
         <div class="flex justify-between items-start mb-md">
           <div class="bg-primary-fixed p-sm rounded-lg"><span class="material-symbols-outlined text-primary">auto_stories</span></div>
-          <span class="text-secondary font-bold text-label-sm">+45</span>
         </div>
         <p class="font-label-md text-label-md text-on-surface-variant">Total Buku</p>
-        <h3 class="font-headline-lg text-headline-lg text-primary mt-xs">8.421</h3>
+        <h3 class="font-headline-lg text-headline-lg text-primary mt-xs" id="stat-total-buku">-</h3>
       </div>
       <div class="stat-card bg-white p-lg rounded-xl border border-outline-variant shadow-[0_4px_12px_rgba(0,0,0,0.04)]">
         <div class="flex justify-between items-start mb-md">
           <div class="bg-secondary-container p-sm rounded-lg"><span class="material-symbols-outlined text-on-secondary-container">import_contacts</span></div>
-          <span class="text-error font-bold text-label-sm">-2%</span>
         </div>
         <p class="font-label-md text-label-md text-on-surface-variant">Buku Dipinjam</p>
-        <h3 class="font-headline-lg text-headline-lg text-primary mt-xs">432</h3>
+        <h3 class="font-headline-lg text-headline-lg text-primary mt-xs" id="stat-buku-dipinjam">-</h3>
       </div>
       <div class="stat-card bg-white p-lg rounded-xl border border-outline-variant shadow-[0_4px_12px_rgba(0,0,0,0.04)]">
         <div class="flex justify-between items-start mb-md">
           <div class="bg-tertiary-fixed p-sm rounded-lg"><span class="material-symbols-outlined text-tertiary">receipt_long</span></div>
-          <span class="text-secondary font-bold text-label-sm">+8%</span>
         </div>
         <p class="font-label-md text-label-md text-on-surface-variant">Transaksi Hari Ini</p>
-        <h3 class="font-headline-lg text-headline-lg text-primary mt-xs">56</h3>
+        <h3 class="font-headline-lg text-headline-lg text-primary mt-xs" id="stat-transaksi-hari-ini">-</h3>
       </div>
     </section>
 
@@ -176,13 +173,15 @@
               <tr class="bg-surface-container-low border-b border-outline-variant">
                 <th class="p-md font-label-sm text-on-surface-variant uppercase tracking-wider">Anggota</th>
                 <th class="p-md font-label-sm text-on-surface-variant uppercase tracking-wider">Judul Buku</th>
-                <th class="p-md font-label-sm text-on-surface-variant uppercase tracking-wider">Tipe</th>
                 <th class="p-md font-label-sm text-on-surface-variant uppercase tracking-wider">Status</th>
                 <th class="p-md font-label-sm text-on-surface-variant uppercase tracking-wider">Aksi</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-outline-variant" id="tabel-aktivitas">
-              <!-- dirender JS -->
+              <tr><td colspan="4" class="text-center py-lg text-on-surface-variant">
+                <span class="material-symbols-outlined text-[28px] animate-spin align-middle">sync</span>
+                <span class="ml-sm">Memuat aktivitas...</span>
+              </td></tr>
             </tbody>
           </table>
         </div>
@@ -192,33 +191,14 @@
       <div class="flex flex-col gap-lg">
         <div class="bg-white p-lg rounded-xl border border-outline-variant shadow-[0_4px_12px_rgba(0,0,0,0.04)]">
           <h3 class="font-headline-md text-headline-md text-on-surface mb-md">Paling Banyak Dipinjam</h3>
-          <div class="flex flex-col gap-md">
-            <div class="flex items-center gap-md">
-              <div class="w-12 h-16 rounded overflow-hidden flex-shrink-0">
-                <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZ30MDRG22JDuZ_oI1SVzHLa_HdyShFapSQy0tWQ5G3iElH7e0xigruKCSYn4nvQTgOmvZhW28lebAg0RXn-j9KiiyF-HOns2HlbunTpS7eRu1Agqg84HWpxZkjhgpMIxSxYsRkuU8DU-C6vnxC92TNtTgC-wEz-bq8J7ZLJ1Whx0tKTokruzyvJMVLyBLLBb-eX8HXRldS98-mZggx-gvvxc1dimCMdIQ5QVUnd1wFmzg43UcZoCt4tXdna_6TufsQ4p2hxOeZN4"/>
-              </div>
-              <div class="flex-1">
-                <p class="font-body-md text-on-surface font-semibold line-clamp-1">The Psychology of Money</p>
-                <p class="font-body-sm text-on-surface-variant">Morgan Housel</p>
-                <div class="w-full bg-surface-container h-1 rounded-full mt-sm"><div class="bg-primary h-1 rounded-full" style="width:85%"></div></div>
-              </div>
-            </div>
-            <div class="flex items-center gap-md">
-              <div class="w-12 h-16 rounded overflow-hidden flex-shrink-0">
-                <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCp7GMffgs9zabK8sunh6VmpqnSYiyjMDlr6OKNuFKpj_vImwzgGyhrh9roSJweW1C9rBTjLvjGUJjRbjmPInCut1X1p5ZyI1g899rhaZgeXIBW5TkjNxvAOUIDbxt-UrEyN8wStK3bqby19_LSjtpBfe4wjeqhmCrVw4jY-adgtt_8pHLS98Tvklsg6-BM4JhoMFS8UJ-9ICoxaWN5LlVc_nVZpg2aN4b2he42h-_Xg-2GfP6cHJj06x-OCL_qTnvYXjl0hI4r_Vk"/>
-              </div>
-              <div class="flex-1">
-                <p class="font-body-md text-on-surface font-semibold line-clamp-1">Atomic Habits</p>
-                <p class="font-body-sm text-on-surface-variant">James Clear</p>
-                <div class="w-full bg-surface-container h-1 rounded-full mt-sm"><div class="bg-primary h-1 rounded-full" style="width:72%"></div></div>
-              </div>
-            </div>
+          <div class="flex flex-col gap-md" id="buku-populer">
+            <p class="font-body-sm text-on-surface-variant">Memuat...</p>
           </div>
         </div>
         <div class="bg-primary-container p-lg rounded-xl text-on-primary-container relative overflow-hidden group">
           <div class="relative z-10">
             <h4 class="font-headline-md text-headline-md font-bold mb-xs">Insight Harian</h4>
-            <p class="font-body-md text-on-primary-container/80">Puncak peminjaman hari ini antara 14:00–16:00. Pertimbangkan menambah staf di jam tersebut besok.</p>
+            <p class="font-body-md text-on-primary-container/80">Pantau transaksi yang belum diverifikasi di halaman Transaksi supaya buku yang sudah dikembalikan segera tercatat lunas.</p>
           </div>
           <div class="absolute -right-4 -bottom-4 opacity-10 group-hover:scale-110 transition-transform duration-500">
             <span class="material-symbols-outlined text-[120px]" style="font-variation-settings:'FILL' 1;">analytics</span>
@@ -271,73 +251,165 @@
 </div>
 
 <script>
-// ===== Data aktivitas =====
-let dataAktivitas = [
-  { id:1, inisial:'JD', nama:'Jane Doe', idAnggota:'#10293', buku:'The Great Gatsby', tipe:'Permintaan Pinjam', status:'Menunggu' },
-  { id:2, inisial:'MS', nama:'Mark Smith', idAnggota:'#10344', buku:'Digital Minimalism', tipe:'Pengembalian', status:'Verifikasi' },
-  { id:3, inisial:'AW', nama:'Alice Wong', idAnggota:'#10592', buku:'Brave New World', tipe:'Terlambat Kembali', status:'Overdue' },
-];
+  // ===== KONFIGURASI API =====
+  const API_BASE_URL = 'http://localhost:5000/api';
+  const token = localStorage.getItem('athenaeum_token');
 
-const warnaDot = { 'Menunggu':'bg-tertiary', 'Verifikasi':'bg-secondary', 'Overdue':'bg-error', 'Disetujui':'bg-secondary' };
+  function formatTanggalSingkat(iso) {
+    const d = new Date(iso);
+    if (isNaN(d)) return '-';
+    return d.toLocaleDateString('id-ID', { day:'2-digit', month:'short' });
+  }
 
-function renderAktivitas() {
-  const tbody = document.getElementById('tabel-aktivitas');
-  tbody.innerHTML = '';
-  dataAktivitas.forEach(item => {
-    tbody.insertAdjacentHTML('beforeend', `
-      <tr class="hover:bg-surface-container transition-colors" id="row-${item.id}">
-        <td class="p-md flex items-center gap-sm">
-          <div class="w-8 h-8 rounded-full bg-surface-variant flex items-center justify-center font-bold text-[12px] text-primary">${item.inisial}</div>
-          <div>
-            <p class="font-body-md text-on-surface font-semibold">${item.nama}</p>
-            <p class="font-body-sm text-on-surface-variant text-[12px]">ID: ${item.idAnggota}</p>
+  // ===== STATISTIK =====
+  async function fetchStats() {
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/stats`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('Gagal memuat statistik');
+      const s = await res.json();
+      document.getElementById('stat-total-anggota').textContent = s.totalAnggota.toLocaleString('id-ID');
+      document.getElementById('stat-total-buku').textContent = s.totalBuku.toLocaleString('id-ID');
+      document.getElementById('stat-buku-dipinjam').textContent = s.bukuDipinjam.toLocaleString('id-ID');
+      document.getElementById('stat-transaksi-hari-ini').textContent = s.transaksiHariIni.toLocaleString('id-ID');
+    } catch (err) {
+      console.error('Gagal memuat statistik:', err);
+    }
+  }
+
+  // ===== AKTIVITAS TERBARU (transaksi yang belum diverifikasi/dikembalikan) =====
+  const labelStatus = { dipinjam: 'Dipinjam', overdue: 'Overdue', dikembalikan: 'Dikembalikan' };
+  const dotStatus = { dipinjam: 'bg-primary', overdue: 'bg-error', dikembalikan: 'bg-secondary' };
+
+  async function fetchAktivitas() {
+    const tbody = document.getElementById('tabel-aktivitas');
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/loans`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('Gagal memuat aktivitas');
+      const loans = await res.json();
+
+      // Tampilkan 5 transaksi teraktif (belum dikembalikan) paling baru
+      const aktif = loans.filter(l => l.status !== 'dikembalikan').slice(0, 5);
+
+      if (!aktif.length) {
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center py-lg text-on-surface-variant">Tidak ada transaksi aktif saat ini.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = '';
+      aktif.forEach(item => {
+        const inisial = (item.nama || '??').split(' ').filter(Boolean).map(w => w[0]).join('').slice(0,2).toUpperCase();
+        tbody.insertAdjacentHTML('beforeend', `
+          <tr class="hover:bg-surface-container transition-colors">
+            <td class="p-md flex items-center gap-sm">
+              <div class="w-8 h-8 rounded-full bg-surface-variant flex items-center justify-center font-bold text-[12px] text-primary">${inisial}</div>
+              <div>
+                <p class="font-body-md text-on-surface font-semibold">${item.nama}</p>
+                <p class="font-body-sm text-on-surface-variant text-[12px]">ID: ${item.idAnggota}</p>
+              </div>
+            </td>
+            <td class="p-md font-body-md text-on-surface">${item.buku}</td>
+            <td class="p-md">
+              <div class="flex items-center gap-xs">
+                <div class="w-2 h-2 rounded-full ${dotStatus[item.status] || 'bg-outline'}"></div>
+                <span class="text-label-sm text-on-surface">${labelStatus[item.status] || item.status}</span>
+              </div>
+            </td>
+            <td class="p-md">
+              <button onclick="verifikasi('${item.id}', this)" class="material-symbols-outlined text-secondary hover:bg-secondary-container p-1 rounded transition-colors" title="Verifikasi pengembalian">check_circle</button>
+            </td>
+          </tr>
+        `);
+      });
+    } catch (err) {
+      console.error(err);
+      tbody.innerHTML = `<tr><td colspan="4" class="text-center py-lg text-error">Gagal memuat aktivitas. Pastikan backend jalan di ${API_BASE_URL}</td></tr>`;
+    }
+  }
+
+  async function verifikasi(loanId, btn) {
+    btn.disabled = true;
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/loans/${loanId}/verify`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Gagal memverifikasi transaksi.');
+      tampilToast('Transaksi berhasil diverifikasi!');
+      await fetchAktivitas();
+      await fetchStats();
+    } catch (err) {
+      alert('❌ ' + err.message);
+      btn.disabled = false;
+    }
+  }
+
+  // ===== BUKU POPULER =====
+  async function fetchBukuPopuler() {
+    const wrap = document.getElementById('buku-populer');
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/popular-books`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('Gagal memuat buku populer');
+      const data = await res.json();
+
+      if (!data.length) {
+        wrap.innerHTML = `<p class="font-body-sm text-on-surface-variant">Belum ada data peminjaman.</p>`;
+        return;
+      }
+
+      wrap.innerHTML = '';
+      data.slice(0, 3).forEach(b => {
+        wrap.insertAdjacentHTML('beforeend', `
+          <div class="flex items-center gap-md">
+            <div class="w-12 h-16 rounded overflow-hidden flex-shrink-0 bg-surface-container">
+              <img class="w-full h-full object-cover" src="${b.img || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=200'}"/>
+            </div>
+            <div class="flex-1">
+              <p class="font-body-md text-on-surface font-semibold line-clamp-1">${b.title}</p>
+              <p class="font-body-sm text-on-surface-variant">${b.author}</p>
+              <div class="w-full bg-surface-container h-1 rounded-full mt-sm"><div class="bg-primary h-1 rounded-full" style="width:${b.percent}%"></div></div>
+            </div>
           </div>
-        </td>
-        <td class="p-md font-body-md text-on-surface">${item.buku}</td>
-        <td class="p-md"><span class="bg-surface-container text-on-surface-variant px-sm py-1 rounded-full text-label-sm">${item.tipe}</span></td>
-        <td class="p-md">
-          <div class="flex items-center gap-xs">
-            <div class="w-2 h-2 rounded-full ${warnaDot[item.status] || 'bg-outline'}"></div>
-            <span class="text-label-sm text-on-surface">${item.status}</span>
-          </div>
-        </td>
-        <td class="p-md">
-          ${item.status !== 'Disetujui'
-            ? `<button onclick="setujuiAktivitas(${item.id})" class="material-symbols-outlined text-secondary hover:bg-secondary-container p-1 rounded transition-colors">check_circle</button>`
-            : `<span class="material-symbols-outlined text-secondary text-[20px]" style="font-variation-settings:'FILL' 1;">check_circle</span>`
-          }
-        </td>
-      </tr>
-    `);
-  });
-}
+        `);
+      });
+    } catch (err) {
+      console.error(err);
+      wrap.innerHTML = `<p class="font-body-sm text-error">Gagal memuat data.</p>`;
+    }
+  }
 
-function setujuiAktivitas(id) {
-  const item = dataAktivitas.find(x => x.id === id);
-  if (!item) return;
-  item.status = 'Disetujui';
-  renderAktivitas();
-  tampilToast(`${item.nama} — ${item.tipe} disetujui`);
-}
+  function tampilToast(msg) {
+    const t = document.createElement('div');
+    t.style.cssText = 'position:fixed;bottom:88px;left:50%;transform:translateX(-50%);background:#191c1e;color:#eff1f3;padding:10px 20px;border-radius:999px;z-index:99;font-size:14px;display:flex;align-items:center;gap:8px;white-space:nowrap;';
+    t.innerHTML = `<span class="material-symbols-outlined" style="font-size:16px;color:#6df5e1">check_circle</span>${msg}`;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+  }
 
-function tampilToast(msg) {
-  const t = document.createElement('div');
-  t.style.cssText = 'position:fixed;bottom:88px;left:50%;transform:translateX(-50%);background:#191c1e;color:#eff1f3;padding:10px 20px;border-radius:999px;z-index:99;font-size:14px;display:flex;align-items:center;gap:8px;white-space:nowrap;';
-  t.innerHTML = `<span class="material-symbols-outlined" style="font-size:16px;color:#6df5e1">check_circle</span>${msg}`;
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), 3000);
-}
+  function bukaInfo(judul, isi) {
+    document.getElementById('info-judul').textContent = judul;
+    document.getElementById('info-isi').textContent = isi;
+    document.getElementById('modal-info').classList.add('show');
+  }
+  function tutupInfo() {
+    document.getElementById('modal-info').classList.remove('show');
+  }
 
-function bukaInfo(judul, isi) {
-  document.getElementById('info-judul').textContent = judul;
-  document.getElementById('info-isi').textContent = isi;
-  document.getElementById('modal-info').classList.add('show');
-}
-function tutupInfo() {
-  document.getElementById('modal-info').classList.remove('show');
-}
+  function logoutUser() {
+    localStorage.removeItem('athenaeum_current_user');
+    localStorage.removeItem('athenaeum_token');
+    window.location.href = 'index.html';
+  }
 
-renderAktivitas();
+  fetchStats();
+  fetchAktivitas();
+  fetchBukuPopuler();
 </script>
 </body>
 </html>

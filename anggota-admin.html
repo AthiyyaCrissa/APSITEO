@@ -88,15 +88,15 @@
     <!-- Summary -->
     <div class="grid grid-cols-3 gap-md mb-xl">
       <div class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl text-center shadow-sm">
-        <p class="font-headline-md text-headline-md text-primary">1.284</p>
+        <p id="sum-total" class="font-headline-md text-headline-md text-primary">0</p>
         <p class="font-label-sm text-on-surface-variant">Total Anggota</p>
       </div>
       <div class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl text-center shadow-sm">
-        <p class="font-headline-md text-headline-md text-secondary">1.048</p>
+        <p id="sum-aktif" class="font-headline-md text-headline-md text-secondary">0</p>
         <p class="font-label-sm text-on-surface-variant">Aktif</p>
       </div>
       <div class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl text-center shadow-sm">
-        <p class="font-headline-md text-headline-md text-outline">236</p>
+        <p id="sum-nonaktif" class="font-headline-md text-headline-md text-outline">0</p>
         <p class="font-label-sm text-on-surface-variant">Tidak Aktif</p>
       </div>
     </div>
@@ -216,140 +216,189 @@
 </nav>
 
 <script>
-let dataAnggota = [
-  { id:'LIB-10293', nama:'Jane Doe', email:'jane.doe@email.com', telepon:'+62 812-0001-0001', tipe:'Premium', status:'Aktif', pinjam:4 },
-  { id:'LIB-10344', nama:'Mark Smith', email:'mark.smith@email.com', telepon:'+62 812-0002-0002', tipe:'Reguler', status:'Aktif', pinjam:2 },
-  { id:'LIB-10592', nama:'Alice Wong', email:'alice.wong@email.com', telepon:'+62 812-0003-0003', tipe:'Reguler', status:'Aktif', pinjam:1 },
-  { id:'LIB-20145', nama:'Ahmad Dahlan', email:'ahmad.d@email.com', telepon:'+62 813-0004-0004', tipe:'Premium', status:'Aktif', pinjam:0 },
-  { id:'LIB-20201', nama:'Sarah Johnson', email:'sarah.j@email.com', telepon:'+62 813-0005-0005', tipe:'Reguler', status:'Aktif', pinjam:3 },
-  { id:'LIB-20388', nama:'Budi Santoso', email:'budi.s@email.com', telepon:'+62 811-0006-0006', tipe:'Reguler', status:'Aktif', pinjam:1 },
-  { id:'LIB-20412', nama:'Dewi Ningsih', email:'dewi.n@email.com', telepon:'+62 857-0007-0007', tipe:'Premium', status:'Tidak Aktif', pinjam:0 },
-  { id:'LIB-20537', nama:'Maya Ratih', email:'maya.r@email.com', telepon:'+62 878-0008-0008', tipe:'Reguler', status:'Aktif', pinjam:2 },
-];
-let idEdit = null;
+  // ===== KONFIGURASI API =====
+  const API_BASE_URL = 'http://localhost:5000/api';
+  const token = localStorage.getItem('athenaeum_token');
 
-function renderAnggota() {
-  const q = document.getElementById('search-input').value.toLowerCase();
-  const sts = document.getElementById('filter-status').value;
-  let hasil = dataAnggota.filter(a =>
-    (!q || a.nama.toLowerCase().includes(q) || a.id.toLowerCase().includes(q))
-    && (sts === 'Semua' || a.status === sts)
-  );
-  document.getElementById('info-jumlah').textContent = `Menampilkan ${hasil.length} dari ${dataAnggota.length} anggota`;
-  const tbody = document.getElementById('tabel-anggota');
-  tbody.innerHTML = '';
-  if (!hasil.length) { document.getElementById('kosong').classList.remove('hidden'); return; }
-  document.getElementById('kosong').classList.add('hidden');
-  hasil.forEach(a => {
-    const aktif = a.status === 'Aktif';
-    const inisial = a.nama.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
-    tbody.insertAdjacentHTML('beforeend', `
-      <tr class="hover:bg-surface-container-low transition-colors group">
-        <td class="px-lg py-md">
-          <div class="flex items-center gap-sm">
-            <div class="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center font-bold text-[11px] text-primary flex-shrink-0">${inisial}</div>
-            <div>
-              <p class="font-body-md font-semibold text-on-surface">${a.nama}</p>
-              <p class="text-[11px] text-on-surface-variant">${a.id}</p>
-            </div>
-          </div>
-        </td>
-        <td class="px-lg py-md font-body-sm text-on-surface-variant hidden md:table-cell">${a.email}</td>
-        <td class="px-lg py-md hidden md:table-cell">
-          <span class="px-sm py-xs rounded-full font-label-sm ${a.tipe === 'Premium' ? 'bg-primary-fixed text-primary' : 'bg-surface-container text-on-surface-variant'}">${a.tipe}</span>
-        </td>
-        <td class="px-lg py-md">
-          <span class="flex items-center gap-xs">
-            <div class="w-2 h-2 rounded-full ${aktif ? 'bg-secondary' : 'bg-outline'}"></div>
-            <span class="font-label-sm font-semibold ${aktif ? 'text-secondary' : 'text-outline'}">${a.status}</span>
-          </span>
-        </td>
-        <td class="px-lg py-md flex items-center gap-sm">
-          <button onclick="bukaDetail('${a.id}')" class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">open_in_new</button>
-          <button onclick="editAnggota('${a.id}')" class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">edit</button>
-          <button onclick="hapusAnggota('${a.id}')" class="material-symbols-outlined text-outline hover:text-error transition-colors">delete</button>
-        </td>
-      </tr>
-    `);
-  });
-}
+  let dataAnggota = [];
+  let idEdit = null; // menyimpan _id (Mongo) saat proses edit
 
-function bukaTambahAnggota() {
-  idEdit = null;
-  document.getElementById('modal-judul').textContent = 'Tambah Anggota';
-  ['nama','email','telepon'].forEach(f => document.getElementById('input-' + f).value = '');
-  document.getElementById('input-tipe').value = 'Reguler';
-  document.getElementById('input-status').value = 'Aktif';
-  document.getElementById('modal-anggota').classList.add('show');
-}
-
-function editAnggota(id) {
-  const a = dataAnggota.find(x => x.id === id);
-  if (!a) return;
-  idEdit = id;
-  document.getElementById('modal-judul').textContent = 'Edit Anggota';
-  document.getElementById('input-nama').value = a.nama;
-  document.getElementById('input-email').value = a.email;
-  document.getElementById('input-telepon').value = a.telepon;
-  document.getElementById('input-tipe').value = a.tipe;
-  document.getElementById('input-status').value = a.status;
-  document.getElementById('modal-anggota').classList.add('show');
-}
-
-function simpanAnggota() {
-  const nama = document.getElementById('input-nama').value.trim();
-  const email = document.getElementById('input-email').value.trim();
-  const telepon = document.getElementById('input-telepon').value.trim();
-  const tipe = document.getElementById('input-tipe').value;
-  const status = document.getElementById('input-status').value;
-  if (!nama || !email) { alert('Nama dan email wajib diisi.'); return; }
-  if (idEdit) {
-    const idx = dataAnggota.findIndex(a => a.id === idEdit);
-    dataAnggota[idx] = { ...dataAnggota[idx], nama, email, telepon, tipe, status };
-    tampilToast('Data anggota berhasil diperbarui!');
-  } else {
-    const newId = 'LIB-' + (20000 + dataAnggota.length + 1);
-    dataAnggota.push({ id: newId, nama, email, telepon, tipe, status, pinjam: 0 });
-    tampilToast('Anggota berhasil ditambahkan!');
+  // ==== AMBIL DATA DARI BACKEND ====
+  async function fetchAnggota() {
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/users`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('Gagal memuat data anggota.');
+      dataAnggota = await res.json();
+      renderSummary();
+      renderAnggota();
+    } catch (err) {
+      console.error(err);
+      tampilToast('Gagal memuat data anggota. Pastikan backend jalan.');
+    }
   }
-  tutupModalAnggota();
-  renderAnggota();
-}
 
-function hapusAnggota(id) {
-  if (!confirm('Yakin ingin menghapus anggota ini?')) return;
-  dataAnggota = dataAnggota.filter(a => a.id !== id);
-  renderAnggota();
-  tampilToast('Anggota berhasil dihapus.');
-}
+  function renderSummary() {
+    const total = dataAnggota.length;
+    const aktif = dataAnggota.filter(a => a.status === 'Aktif').length;
+    const tidakAktif = total - aktif;
+    document.getElementById('sum-total').textContent = total.toLocaleString('id-ID');
+    document.getElementById('sum-aktif').textContent = aktif.toLocaleString('id-ID');
+    document.getElementById('sum-nonaktif').textContent = tidakAktif.toLocaleString('id-ID');
+  }
 
-function bukaDetail(id) {
-  const a = dataAnggota.find(x => x.id === id);
-  if (!a) return;
-  document.getElementById('det-id').textContent = a.id;
-  document.getElementById('det-nama').textContent = a.nama;
-  document.getElementById('det-email').textContent = a.email;
-  document.getElementById('det-telepon').textContent = a.telepon;
-  document.getElementById('det-tipe').textContent = a.tipe;
-  const el = document.getElementById('det-status');
-  el.textContent = a.status;
-  el.className = 'font-bold ' + (a.status === 'Aktif' ? 'text-secondary' : 'text-outline');
-  document.getElementById('det-pinjam').textContent = a.pinjam + ' buku';
-  document.getElementById('modal-detail').classList.add('show');
-}
+  function renderAnggota() {
+    const q = document.getElementById('search-input').value.toLowerCase();
+    const sts = document.getElementById('filter-status').value;
+    let hasil = dataAnggota.filter(a =>
+      (!q || a.nama.toLowerCase().includes(q) || a.id.toLowerCase().includes(q))
+      && (sts === 'Semua' || a.status === sts)
+    );
+    document.getElementById('info-jumlah').textContent = `Menampilkan ${hasil.length} dari ${dataAnggota.length} anggota`;
+    const tbody = document.getElementById('tabel-anggota');
+    tbody.innerHTML = '';
+    if (!hasil.length) { document.getElementById('kosong').classList.remove('hidden'); return; }
+    document.getElementById('kosong').classList.add('hidden');
+    hasil.forEach(a => {
+      const aktif = a.status === 'Aktif';
+      const inisial = a.nama.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+      tbody.insertAdjacentHTML('beforeend', `
+        <tr class="hover:bg-surface-container-low transition-colors group">
+          <td class="px-lg py-md">
+            <div class="flex items-center gap-sm">
+              <div class="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center font-bold text-[11px] text-primary flex-shrink-0">${inisial}</div>
+              <div>
+                <p class="font-body-md font-semibold text-on-surface">${a.nama}</p>
+                <p class="text-[11px] text-on-surface-variant">${a.id}</p>
+              </div>
+            </div>
+          </td>
+          <td class="px-lg py-md font-body-sm text-on-surface-variant hidden md:table-cell">${a.email}</td>
+          <td class="px-lg py-md hidden md:table-cell">
+            <span class="px-sm py-xs rounded-full font-label-sm ${a.tipe === 'Premium' ? 'bg-primary-fixed text-primary' : 'bg-surface-container text-on-surface-variant'}">${a.tipe}</span>
+          </td>
+          <td class="px-lg py-md">
+            <span class="flex items-center gap-xs">
+              <div class="w-2 h-2 rounded-full ${aktif ? 'bg-secondary' : 'bg-outline'}"></div>
+              <span class="font-label-sm font-semibold ${aktif ? 'text-secondary' : 'text-outline'}">${a.status}</span>
+            </span>
+          </td>
+          <td class="px-lg py-md flex items-center gap-sm">
+            <button onclick="bukaDetail('${a._id}')" class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">open_in_new</button>
+            <button onclick="editAnggota('${a._id}')" class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">edit</button>
+            <button onclick="hapusAnggota('${a._id}')" class="material-symbols-outlined text-outline hover:text-error transition-colors">delete</button>
+          </td>
+        </tr>
+      `);
+    });
+  }
 
-function tutupModalAnggota() { document.getElementById('modal-anggota').classList.remove('show'); }
-function tutupDetail() { document.getElementById('modal-detail').classList.remove('show'); }
+  function bukaTambahAnggota() {
+    idEdit = null;
+    document.getElementById('modal-judul').textContent = 'Tambah Anggota';
+    ['nama','email','telepon'].forEach(f => document.getElementById('input-' + f).value = '');
+    document.getElementById('input-tipe').value = 'Reguler';
+    document.getElementById('input-status').value = 'Aktif';
+    document.getElementById('modal-anggota').classList.add('show');
+  }
 
-function tampilToast(msg) {
-  const t = document.createElement('div');
-  t.style.cssText = 'position:fixed;bottom:88px;left:50%;transform:translateX(-50%);background:#191c1e;color:#eff1f3;padding:10px 20px;border-radius:999px;z-index:99;font-size:14px;display:flex;align-items:center;gap:8px;white-space:nowrap;';
-  t.innerHTML = `<span class="material-symbols-outlined" style="font-size:16px;color:#6df5e1">check_circle</span>${msg}`;
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), 3000);
-}
+  function editAnggota(_id) {
+    const a = dataAnggota.find(x => x._id === _id);
+    if (!a) return;
+    idEdit = _id;
+    document.getElementById('modal-judul').textContent = 'Edit Anggota';
+    document.getElementById('input-nama').value = a.nama;
+    document.getElementById('input-email').value = a.email;
+    document.getElementById('input-telepon').value = a.telepon;
+    document.getElementById('input-tipe').value = a.tipe;
+    document.getElementById('input-status').value = a.status;
+    document.getElementById('modal-anggota').classList.add('show');
+  }
 
-renderAnggota();
+  // ==== SIMPAN (CREATE / UPDATE via API) ====
+  async function simpanAnggota() {
+    const nama = document.getElementById('input-nama').value.trim();
+    const email = document.getElementById('input-email').value.trim();
+    const telepon = document.getElementById('input-telepon').value.trim();
+    const tipe = document.getElementById('input-tipe').value;
+    const status = document.getElementById('input-status').value;
+    if (!nama || !email) { alert('Nama dan email wajib diisi.'); return; }
+
+    const payload = { nama, email, telepon, tipe, status };
+
+    try {
+      let res, data;
+      if (idEdit) {
+        res = await fetch(`${API_BASE_URL}/admin/users/${idEdit}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify(payload)
+        });
+        data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Gagal memperbarui anggota.');
+        tampilToast('Data anggota berhasil diperbarui!');
+      } else {
+        res = await fetch(`${API_BASE_URL}/admin/users`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify(payload)
+        });
+        data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Gagal menambah anggota.');
+        tampilToast(`Anggota ditambahkan! Password sementara: ${data.tempPassword}`);
+      }
+      tutupModalAnggota();
+      fetchAnggota();
+    } catch (err) {
+      alert(err.message);
+    }
+  }
+
+  // ==== HAPUS (via API) ====
+  async function hapusAnggota(_id) {
+    if (!confirm('Yakin ingin menghapus anggota ini?')) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/users/${_id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Gagal menghapus anggota.');
+      tampilToast('Anggota berhasil dihapus.');
+      fetchAnggota();
+    } catch (err) {
+      alert(err.message);
+    }
+  }
+
+  function bukaDetail(_id) {
+    const a = dataAnggota.find(x => x._id === _id);
+    if (!a) return;
+    document.getElementById('det-id').textContent = a.id;
+    document.getElementById('det-nama').textContent = a.nama;
+    document.getElementById('det-email').textContent = a.email;
+    document.getElementById('det-telepon').textContent = a.telepon;
+    document.getElementById('det-tipe').textContent = a.tipe;
+    const el = document.getElementById('det-status');
+    el.textContent = a.status;
+    el.className = 'font-bold ' + (a.status === 'Aktif' ? 'text-secondary' : 'text-outline');
+    document.getElementById('det-pinjam').textContent = a.pinjam + ' buku';
+    document.getElementById('modal-detail').classList.add('show');
+  }
+
+  function tutupModalAnggota() { document.getElementById('modal-anggota').classList.remove('show'); }
+  function tutupDetail() { document.getElementById('modal-detail').classList.remove('show'); }
+
+  function tampilToast(msg) {
+    const t = document.createElement('div');
+    t.style.cssText = 'position:fixed;bottom:88px;left:50%;transform:translateX(-50%);background:#191c1e;color:#eff1f3;padding:10px 20px;border-radius:999px;z-index:99;font-size:14px;display:flex;align-items:center;gap:8px;white-space:nowrap;';
+    t.innerHTML = `<span class="material-symbols-outlined" style="font-size:16px;color:#6df5e1">check_circle</span>${msg}`;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+  }
+
+  fetchAnggota();
 </script>
 </body>
 </html>

@@ -36,6 +36,8 @@
 </script>
 </head>
 <body class="bg-surface text-on-surface">
+<script>window.ATHENAEUM_ALLOWED_ROLES = ['admin'];</script>
+<script src="auth-guard.js"></script>
 
 <header class="bg-surface shadow-sm sticky top-0 z-40 h-16 flex justify-between items-center w-full px-lg max-w-container-max mx-auto">
   <div class="flex items-center gap-md">
@@ -43,7 +45,7 @@
     <h1 class="font-headline-md text-headline-md font-bold text-primary">Athenaeum Library</h1>
   </div>
   <span class="hidden md:block font-label-md text-on-surface-variant">Admin</span>
-  <a href="index.html" class="material-symbols-outlined text-on-surface-variant hover:text-error transition-colors" title="Logout">logout</a>
+  <a href="#" onclick="logoutUser(); return false;" class="material-symbols-outlined text-on-surface-variant hover:text-error transition-colors" title="Logout">logout</a>
 </header>
 
 <div class="flex max-w-container-max mx-auto min-h-screen">
@@ -82,19 +84,19 @@
 
     <div class="grid grid-cols-2 md:grid-cols-4 gap-md mb-xl">
       <div class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl shadow-sm text-center">
-        <p class="font-headline-md text-headline-md text-primary">24</p>
+        <p class="font-headline-md text-headline-md text-primary" id="sum-pinjam-hari-ini">-</p>
         <p class="font-label-sm text-on-surface-variant mt-xs">Dipinjam Hari Ini</p>
       </div>
       <div class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl shadow-sm text-center">
-        <p class="font-headline-md text-headline-md text-secondary">18</p>
-        <p class="font-label-sm text-on-surface-variant mt-xs">Dikembalikan</p>
+        <p class="font-headline-md text-headline-md text-secondary" id="sum-kembali-hari-ini">-</p>
+        <p class="font-label-sm text-on-surface-variant mt-xs">Dikembalikan Hari Ini</p>
       </div>
       <div class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl shadow-sm text-center">
-        <p class="font-headline-md text-headline-md text-error">7</p>
+        <p class="font-headline-md text-headline-md text-error" id="sum-overdue">-</p>
         <p class="font-label-sm text-on-surface-variant mt-xs">Overdue</p>
       </div>
       <div class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl shadow-sm text-center">
-        <p class="font-headline-md text-headline-md text-on-surface">432</p>
+        <p class="font-headline-md text-headline-md text-on-surface" id="sum-total-aktif">-</p>
         <p class="font-label-sm text-on-surface-variant mt-xs">Total Aktif</p>
       </div>
     </div>
@@ -106,10 +108,9 @@
       </div>
       <select id="filter-status" onchange="renderTransaksi()" class="border border-outline-variant rounded-xl py-3 px-md bg-white focus:ring-1 focus:ring-primary font-body-md">
         <option value="Semua">Semua Status</option>
-        <option value="Menunggu">Menunggu Verifikasi</option>
-        <option value="Borrowed">Dipinjam</option>
-        <option value="Returned">Dikembalikan</option>
-        <option value="Overdue">Overdue</option>
+        <option value="dipinjam">Dipinjam</option>
+        <option value="overdue">Overdue</option>
+        <option value="dikembalikan">Dikembalikan</option>
       </select>
     </div>
 
@@ -128,6 +129,10 @@
           </thead>
           <tbody id="tabel-transaksi" class="divide-y divide-outline-variant"></tbody>
         </table>
+      </div>
+      <div id="loading" class="text-center py-xl">
+        <span class="material-symbols-outlined text-[40px] animate-spin text-outline">sync</span>
+        <p class="text-on-surface-variant font-body-md mt-md">Memuat transaksi...</p>
       </div>
       <div id="kosong" class="hidden text-center py-xl">
         <span class="material-symbols-outlined text-[48px] text-outline">search_off</span>
@@ -172,7 +177,7 @@
     <p class="font-body-md text-on-surface-variant mb-lg">Tandai transaksi <strong id="v-nama" class="text-on-surface"></strong> sebagai <strong class="text-secondary">Dikembalikan</strong>?</p>
     <div class="flex gap-sm">
       <button onclick="tutupVerifikasi()" class="flex-1 border border-outline-variant text-on-surface-variant py-3 rounded-lg font-label-md hover:bg-surface-container transition-colors">Batal</button>
-      <button onclick="konfirmasiVerifikasi()" class="flex-1 bg-secondary text-white py-3 rounded-lg font-label-md hover:opacity-90 active:scale-95 transition-all">Ya, Verifikasi</button>
+      <button id="btn-konfirmasi-verifikasi" onclick="konfirmasiVerifikasi()" class="flex-1 bg-secondary text-white py-3 rounded-lg font-label-md hover:opacity-90 active:scale-95 transition-all">Ya, Verifikasi</button>
     </div>
   </div>
 </div>
@@ -193,112 +198,178 @@
 </nav>
 
 <script>
-let dataTransaksi = [
-  { id:'TX001', nama:'Jane Doe', idAnggota:'#10293', buku:'The Great Gatsby', tglPinjam:'15 Okt 2024', tglKembali:'29 Okt 2024', status:'Menunggu', denda:'Rp 0' },
-  { id:'TX002', nama:'Mark Smith', idAnggota:'#10344', buku:'Digital Minimalism', tglPinjam:'14 Okt 2024', tglKembali:'28 Okt 2024', status:'Menunggu', denda:'Rp 0' },
-  { id:'TX003', nama:'Alice Wong', idAnggota:'#10592', buku:'Brave New World', tglPinjam:'10 Okt 2024', tglKembali:'24 Okt 2024', status:'Overdue', denda:'Rp 5.000' },
-  { id:'TX004', nama:'Ahmad Dahlan', idAnggota:'#20145', buku:'The Alchemist', tglPinjam:'12 Okt 2024', tglKembali:'26 Okt 2024', status:'Returned', denda:'Rp 0' },
-  { id:'TX005', nama:'Sarah Johnson', idAnggota:'#20201', buku:'Introduction to Algorithms', tglPinjam:'11 Okt 2024', tglKembali:'25 Okt 2024', status:'Borrowed', denda:'Rp 0' },
-  { id:'TX006', nama:'Budi Santoso', idAnggota:'#20388', buku:'Atomic Habits', tglPinjam:'10 Okt 2024', tglKembali:'24 Okt 2024', status:'Overdue', denda:'Rp 2.000' },
-  { id:'TX007', nama:'Dewi Ningsih', idAnggota:'#20412', buku:'Sapiens', tglPinjam:'09 Okt 2024', tglKembali:'23 Okt 2024', status:'Returned', denda:'Rp 0' },
-];
+  // ===== KONFIGURASI API =====
+  const API_BASE_URL = 'http://localhost:5000/api';
+  const token = localStorage.getItem('athenaeum_token');
 
-const warnaSts = { 'Menunggu':'text-tertiary-500', 'Borrowed':'text-primary', 'Returned':'text-secondary', 'Overdue':'text-error' };
-const dotSts = { 'Menunggu':'bg-yellow-500', 'Borrowed':'bg-primary', 'Returned':'bg-secondary', 'Overdue':'bg-error' };
-const labelSts = { 'Menunggu':'Menunggu', 'Borrowed':'Dipinjam', 'Returned':'Dikembalikan', 'Overdue':'Overdue' };
+  let dataTransaksi = []; // diisi dari GET /api/admin/loans
+  let idVerifikasi = null;
 
-let idVerifikasi = null;
+  const warnaSts = { dipinjam: 'text-primary', overdue: 'text-error', dikembalikan: 'text-secondary' };
+  const dotSts = { dipinjam: 'bg-primary', overdue: 'bg-error', dikembalikan: 'bg-secondary' };
+  const labelSts = { dipinjam: 'Dipinjam', overdue: 'Overdue', dikembalikan: 'Dikembalikan' };
 
-function renderTransaksi() {
-  const q = document.getElementById('search-input').value.toLowerCase();
-  const sts = document.getElementById('filter-status').value;
-  let hasil = dataTransaksi.filter(t =>
-    (!q || t.nama.toLowerCase().includes(q) || t.buku.toLowerCase().includes(q))
-    && (sts === 'Semua' || t.status === sts)
-  );
-  const tbody = document.getElementById('tabel-transaksi');
-  tbody.innerHTML = '';
-  if (!hasil.length) { document.getElementById('kosong').classList.remove('hidden'); return; }
-  document.getElementById('kosong').classList.add('hidden');
-  hasil.forEach(t => {
-    const bisaVerifikasi = t.status === 'Menunggu' || t.status === 'Borrowed' || t.status === 'Overdue';
-    tbody.insertAdjacentHTML('beforeend', `
-      <tr class="hover:bg-surface-container-low transition-colors group">
-        <td class="px-lg py-md">
-          <p class="font-body-md font-semibold text-on-surface">${t.nama}</p>
-          <p class="text-[11px] text-on-surface-variant">${t.idAnggota}</p>
-        </td>
-        <td class="px-lg py-md font-body-md text-on-surface">${t.buku}</td>
-        <td class="px-lg py-md font-body-md text-outline">${t.tglPinjam}</td>
-        <td class="px-lg py-md font-body-md text-outline">${t.tglKembali}</td>
-        <td class="px-lg py-md">
-          <span class="flex items-center gap-sm">
-            <div class="w-2 h-2 rounded-full ${dotSts[t.status]}"></div>
-            <span class="font-label-sm font-semibold" style="color:${t.status==='Menunggu'?'#92400e':''}">${labelSts[t.status]}</span>
-          </span>
-        </td>
-        <td class="px-lg py-md flex items-center gap-sm">
-          <button onclick="bukaDetail('${t.id}')" class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">open_in_new</button>
-          ${bisaVerifikasi ? `<button onclick="bukaVerifikasi('${t.id}')" class="material-symbols-outlined text-outline hover:text-secondary transition-colors" title="Verifikasi">verified</button>` : ''}
-        </td>
-      </tr>
-    `);
-  });
-}
+  function formatTgl(iso) {
+    const d = new Date(iso);
+    if (isNaN(d)) return '-';
+    return d.toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' });
+  }
+  function formatRupiah(n) {
+    return 'Rp ' + (Number(n) || 0).toLocaleString('id-ID');
+  }
+  function isSameDay(iso) {
+    const d = new Date(iso);
+    const now = new Date();
+    return !isNaN(d) && d.toDateString() === now.toDateString();
+  }
 
-function bukaDetail(id) {
-  const t = dataTransaksi.find(x => x.id === id);
-  if (!t) return;
-  document.getElementById('d-nama').textContent = t.nama;
-  document.getElementById('d-id').textContent = t.idAnggota;
-  document.getElementById('d-buku').textContent = t.buku;
-  document.getElementById('d-pinjam').textContent = t.tglPinjam;
-  document.getElementById('d-kembali').textContent = t.tglKembali;
-  const el = document.getElementById('d-status');
-  el.textContent = labelSts[t.status];
-  el.className = 'font-bold ' + (warnaSts[t.status] || 'text-on-surface');
-  document.getElementById('d-denda').textContent = t.denda;
-  const bisaVerifikasi = t.status === 'Menunggu' || t.status === 'Borrowed' || t.status === 'Overdue';
-  const btnV = document.getElementById('btn-verifikasi-detail');
-  btnV.style.display = bisaVerifikasi ? '' : 'none';
-  btnV.dataset.id = id;
-  document.getElementById('modal-detail').classList.add('show');
-}
+  async function fetchTransaksi() {
+    document.getElementById('loading').classList.remove('hidden');
+    document.getElementById('kosong').classList.add('hidden');
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/loans`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('Gagal memuat transaksi');
+      dataTransaksi = await res.json();
+      updateSummary();
+      renderTransaksi();
+    } catch (err) {
+      console.error(err);
+      document.getElementById('loading').innerHTML = `
+        <span class="material-symbols-outlined text-[48px] text-error">cloud_off</span>
+        <p class="text-error font-body-md mt-md">Gagal memuat transaksi. Pastikan backend jalan di ${API_BASE_URL}</p>`;
+      return;
+    }
+    document.getElementById('loading').classList.add('hidden');
+  }
 
-function verifikasiDariDetail() {
-  const id = document.getElementById('btn-verifikasi-detail').dataset.id;
-  tutupDetail();
-  bukaVerifikasi(id);
-}
+  function updateSummary() {
+    const pinjamHariIni = dataTransaksi.filter(t => isSameDay(t.tglPinjam)).length;
+    const kembaliHariIni = dataTransaksi.filter(t => t.status === 'dikembalikan' && isSameDay(t.tglKembali)).length;
+    const overdue = dataTransaksi.filter(t => t.status === 'overdue').length;
+    const totalAktif = dataTransaksi.filter(t => t.status !== 'dikembalikan').length;
 
-function bukaVerifikasi(id) {
-  const t = dataTransaksi.find(x => x.id === id);
-  if (!t) return;
-  idVerifikasi = id;
-  document.getElementById('v-nama').textContent = `${t.nama} — ${t.buku}`;
-  document.getElementById('modal-verifikasi').classList.add('show');
-}
+    document.getElementById('sum-pinjam-hari-ini').textContent = pinjamHariIni;
+    document.getElementById('sum-kembali-hari-ini').textContent = kembaliHariIni;
+    document.getElementById('sum-overdue').textContent = overdue;
+    document.getElementById('sum-total-aktif').textContent = totalAktif;
+  }
 
-function konfirmasiVerifikasi() {
-  const t = dataTransaksi.find(x => x.id === idVerifikasi);
-  if (t) { t.status = 'Returned'; t.denda = 'Rp 0'; }
-  tutupVerifikasi();
-  renderTransaksi();
-  tampilToast('Transaksi berhasil diverifikasi!');
-}
+  function renderTransaksi() {
+    const q = document.getElementById('search-input').value.toLowerCase();
+    const sts = document.getElementById('filter-status').value;
+    let hasil = dataTransaksi.filter(t =>
+      (!q || t.nama.toLowerCase().includes(q) || t.buku.toLowerCase().includes(q))
+      && (sts === 'Semua' || t.status === sts)
+    );
+    const tbody = document.getElementById('tabel-transaksi');
+    tbody.innerHTML = '';
+    if (!hasil.length) { document.getElementById('kosong').classList.remove('hidden'); return; }
+    document.getElementById('kosong').classList.add('hidden');
+    hasil.forEach(t => {
+      const bisaVerifikasi = t.status === 'dipinjam' || t.status === 'overdue';
+      tbody.insertAdjacentHTML('beforeend', `
+        <tr class="hover:bg-surface-container-low transition-colors group">
+          <td class="px-lg py-md">
+            <p class="font-body-md font-semibold text-on-surface">${t.nama}</p>
+            <p class="text-[11px] text-on-surface-variant">${t.idAnggota}</p>
+          </td>
+          <td class="px-lg py-md font-body-md text-on-surface">${t.buku}</td>
+          <td class="px-lg py-md font-body-md text-outline">${formatTgl(t.tglPinjam)}</td>
+          <td class="px-lg py-md font-body-md text-outline">${formatTgl(t.tglKembali)}</td>
+          <td class="px-lg py-md">
+            <span class="flex items-center gap-sm">
+              <div class="w-2 h-2 rounded-full ${dotSts[t.status]}"></div>
+              <span class="font-label-sm font-semibold ${warnaSts[t.status]}">${labelSts[t.status]}</span>
+            </span>
+          </td>
+          <td class="px-lg py-md flex items-center gap-sm">
+            <button onclick="bukaDetail('${t.id}')" class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">open_in_new</button>
+            ${bisaVerifikasi ? `<button onclick="bukaVerifikasi('${t.id}')" class="material-symbols-outlined text-outline hover:text-secondary transition-colors" title="Verifikasi">verified</button>` : ''}
+          </td>
+        </tr>
+      `);
+    });
+  }
 
-function tutupDetail() { document.getElementById('modal-detail').classList.remove('show'); }
-function tutupVerifikasi() { document.getElementById('modal-verifikasi').classList.remove('show'); }
+  function bukaDetail(id) {
+    const t = dataTransaksi.find(x => x.id === id);
+    if (!t) return;
+    document.getElementById('d-nama').textContent = t.nama;
+    document.getElementById('d-id').textContent = t.idAnggota;
+    document.getElementById('d-buku').textContent = t.buku;
+    document.getElementById('d-pinjam').textContent = formatTgl(t.tglPinjam);
+    document.getElementById('d-kembali').textContent = formatTgl(t.tglKembali);
+    const el = document.getElementById('d-status');
+    el.textContent = labelSts[t.status];
+    el.className = 'font-bold ' + (warnaSts[t.status] || 'text-on-surface');
+    document.getElementById('d-denda').textContent = formatRupiah(t.denda);
+    const bisaVerifikasi = t.status === 'dipinjam' || t.status === 'overdue';
+    const btnV = document.getElementById('btn-verifikasi-detail');
+    btnV.style.display = bisaVerifikasi ? '' : 'none';
+    btnV.dataset.id = id;
+    document.getElementById('modal-detail').classList.add('show');
+  }
 
-function tampilToast(msg) {
-  const t = document.createElement('div');
-  t.style.cssText = 'position:fixed;bottom:88px;left:50%;transform:translateX(-50%);background:#191c1e;color:#eff1f3;padding:10px 20px;border-radius:999px;z-index:99;font-size:14px;display:flex;align-items:center;gap:8px;white-space:nowrap;';
-  t.innerHTML = `<span class="material-symbols-outlined" style="font-size:16px;color:#6df5e1">check_circle</span>${msg}`;
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), 3000);
-}
+  function verifikasiDariDetail() {
+    const id = document.getElementById('btn-verifikasi-detail').dataset.id;
+    tutupDetail();
+    bukaVerifikasi(id);
+  }
 
-renderTransaksi();
+  function bukaVerifikasi(id) {
+    const t = dataTransaksi.find(x => x.id === id);
+    if (!t) return;
+    idVerifikasi = id;
+    document.getElementById('v-nama').textContent = `${t.nama} — ${t.buku}`;
+    document.getElementById('modal-verifikasi').classList.add('show');
+  }
+
+  async function konfirmasiVerifikasi() {
+    if (!idVerifikasi) return;
+    const btn = document.getElementById('btn-konfirmasi-verifikasi');
+    const original = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Memproses...';
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/loans/${idVerifikasi}/verify`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Gagal memverifikasi transaksi.');
+
+      tutupVerifikasi();
+      tampilToast('Transaksi berhasil diverifikasi!');
+      await fetchTransaksi();
+    } catch (err) {
+      alert('❌ ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = original;
+    }
+  }
+
+  function tutupDetail() { document.getElementById('modal-detail').classList.remove('show'); }
+  function tutupVerifikasi() { document.getElementById('modal-verifikasi').classList.remove('show'); }
+
+  function tampilToast(msg) {
+    const t = document.createElement('div');
+    t.style.cssText = 'position:fixed;bottom:88px;left:50%;transform:translateX(-50%);background:#191c1e;color:#eff1f3;padding:10px 20px;border-radius:999px;z-index:99;font-size:14px;display:flex;align-items:center;gap:8px;white-space:nowrap;';
+    t.innerHTML = `<span class="material-symbols-outlined" style="font-size:16px;color:#6df5e1">check_circle</span>${msg}`;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+  }
+
+  function logoutUser() {
+    localStorage.removeItem('athenaeum_current_user');
+    localStorage.removeItem('athenaeum_token');
+    window.location.href = 'index.html';
+  }
+
+  fetchTransaksi();
 </script>
 </body>
 </html>

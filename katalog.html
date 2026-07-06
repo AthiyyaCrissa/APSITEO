@@ -79,6 +79,8 @@
 </script>
 </head>
 <body class="bg-surface text-on-surface font-body-md selection:bg-secondary-container selection:text-on-secondary-container">
+<script>window.ATHENAEUM_ALLOWED_ROLES = ['member'];</script>
+<script src="auth-guard.js"></script>
 
 <!-- OVERLAY -->
 <div id="overlay" class="fixed inset-0 bg-black/40 z-40 opacity-0 pointer-events-none" onclick="closeAll()"></div>
@@ -90,17 +92,17 @@
     <button onclick="closeDrawer()" class="material-symbols-outlined text-on-surface-variant hover:text-error transition-colors">close</button>
   </div>
   <div class="px-lg py-md flex items-center gap-md border-b border-outline-variant">
-    <div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold">JD</div>
+    <div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold" id="drawer-initials">JD</div>
     <div>
-      <p class="font-body-md font-bold text-on-surface">Jane Doe</p>
-      <p class="font-label-sm text-on-surface-variant">Premium Member · LIB-99231</p>
+      <p class="font-body-md font-bold text-on-surface" id="drawer-name">Jane Doe</p>
+      <p class="font-label-sm text-on-surface-variant" id="drawer-role">Member</p>
     </div>
   </div>
   <nav class="flex-1 px-md py-md space-y-1">
-    <a href="catalog.html" class="flex items-center gap-md px-md py-3 rounded-lg bg-primary-container text-on-primary-container font-body-md">
+    <a href="katalog.html" class="flex items-center gap-md px-md py-3 rounded-lg bg-primary-container text-on-primary-container font-body-md">
       <span class="material-symbols-outlined">dashboard</span> Dashboard
     </a>
-    <a href="catalog.html" class="flex items-center gap-md px-md py-3 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors font-body-md">
+    <a href="katalog.html" class="flex items-center gap-md px-md py-3 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors font-body-md">
       <span class="material-symbols-outlined">auto_stories</span> Catalog
     </a>
     <a href="profil.html" class="flex items-center gap-md px-md py-3 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors font-body-md">
@@ -114,7 +116,7 @@
     </a>
   </nav>
   <div class="px-md py-md border-t border-outline-variant">
-    <a href="index.html" class="flex items-center gap-md px-md py-3 rounded-lg text-error hover:bg-error-container transition-colors font-body-md">
+    <a href="#" onclick="logoutUser(); return false;" class="flex items-center gap-md px-md py-3 rounded-lg text-error hover:bg-error-container transition-colors font-body-md">
       <span class="material-symbols-outlined">logout</span> Logout
     </a>
   </div>
@@ -129,8 +131,8 @@
     </div>
     <!-- Nav links — z-index lebih tinggi dari overlay agar bisa diklik -->
     <nav class="hidden md:flex gap-xl items-center relative z-50">
-      <a class="text-primary font-bold border-b-2 border-primary py-2 transition-colors" href="catalog.html">Dashboard</a>
-      <a class="text-on-surface-variant hover:text-primary transition-colors" href="catalog.html">Catalog</a>
+      <a class="text-primary font-bold border-b-2 border-primary py-2 transition-colors" href="katalog.html">Dashboard</a>
+      <a class="text-on-surface-variant hover:text-primary transition-colors" href="katalog.html">Catalog</a>
       <a class="text-on-surface-variant hover:text-primary transition-colors" href="profil.html">Profile</a>
     </nav>
     <div class="flex items-center gap-md relative z-50">
@@ -139,36 +141,17 @@
       <div class="relative">
         <button id="notif-btn" onclick="toggleNotif(event)" class="relative text-on-surface-variant hover:text-primary transition-colors active:scale-95 p-1">
           <span class="material-symbols-outlined">notifications</span>
-          <span id="notif-dot" class="absolute top-0 right-0 w-2 h-2 bg-error rounded-full"></span>
+          <span id="notif-dot" class="absolute top-0 right-0 w-2 h-2 bg-error rounded-full hidden"></span>
         </button>
         <div id="notif-dropdown" class="dropdown absolute right-0 top-10 w-80 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-lg z-50 overflow-hidden">
           <div class="px-md py-sm border-b border-outline-variant flex justify-between items-center">
             <p class="font-label-md text-label-md text-on-surface font-bold">Notifikasi</p>
             <button onclick="markAllRead()" class="text-primary font-label-sm text-label-sm hover:underline">Tandai semua dibaca</button>
           </div>
-          <div class="divide-y divide-outline-variant max-h-72 overflow-y-auto">
-            <div class="notif-unread px-md py-sm bg-primary-fixed/20 flex gap-sm items-start">
-              <span class="material-symbols-outlined text-error text-[20px] mt-0.5">report</span>
-              <div>
-                <p class="font-body-sm text-on-surface font-semibold">Buku Overdue!</p>
-                <p class="font-body-sm text-on-surface-variant">Sapiens sudah melewati batas tanggal kembali.</p>
-                <p class="font-label-sm text-outline mt-xs">2 jam lalu</p>
-              </div>
-            </div>
-            <div class="notif-unread px-md py-sm bg-primary-fixed/20 flex gap-sm items-start">
-              <span class="material-symbols-outlined text-secondary text-[20px] mt-0.5">event_repeat</span>
-              <div>
-                <p class="font-body-sm text-on-surface font-semibold">Jatuh tempo 3 hari lagi</p>
-                <p class="font-body-sm text-on-surface-variant">4 buku akan segera jatuh tempo pengembalian.</p>
-                <p class="font-label-sm text-outline mt-xs">1 hari lalu</p>
-              </div>
-            </div>
-            <div class="px-md py-sm flex gap-sm items-start">
-              <span class="material-symbols-outlined text-primary text-[20px] mt-0.5">bookmark_added</span>
-              <div>
-                <p class="font-body-sm text-on-surface">Future Narratives sudah tersedia untuk dipinjam.</p>
-                <p class="font-label-sm text-outline mt-xs">3 hari lalu</p>
-              </div>
+          <div id="notif-dropdown-list" class="divide-y divide-outline-variant max-h-72 overflow-y-auto">
+            <div class="px-md py-lg text-center text-on-surface-variant">
+              <span class="material-symbols-outlined text-[28px] animate-spin align-middle">sync</span>
+              <p class="font-body-sm mt-xs">Memuat notifikasi...</p>
             </div>
           </div>
           <a href="notifikasi.html" class="block text-center py-sm text-primary font-label-md text-label-md hover:bg-surface-container transition-colors border-t border-outline-variant">
@@ -180,12 +163,12 @@
       <!-- AVATAR/PROFIL DROPDOWN -->
       <div class="relative">
         <button id="profile-btn" onclick="toggleProfile(event)" class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-sm hover:ring-2 hover:ring-primary transition-all active:scale-95">
-          JD
+          <span id="header-initials">JD</span>
         </button>
         <div id="profile-dropdown" class="dropdown absolute right-0 top-10 w-56 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-lg z-50 overflow-hidden">
           <div class="px-md py-sm border-b border-outline-variant">
-            <p class="font-body-md font-bold text-on-surface">Jane Doe</p>
-            <p class="font-label-sm text-on-surface-variant">Premium Member</p>
+            <p class="font-body-md font-bold text-on-surface" id="header-name">Jane Doe</p>
+            <p class="font-label-sm text-on-surface-variant" id="header-role">Member</p>
           </div>
           <div class="py-xs">
             <a href="profil.html" class="flex items-center gap-sm px-md py-sm text-on-surface hover:bg-surface-container transition-colors font-body-md">
@@ -199,7 +182,7 @@
             </a>
           </div>
           <div class="border-t border-outline-variant py-xs">
-            <a href="index.html" class="flex items-center gap-sm px-md py-sm text-error hover:bg-error-container transition-colors font-body-md">
+            <a href="#" onclick="logoutUser(); return false;" class="flex items-center gap-sm px-md py-sm text-error hover:bg-error-container transition-colors font-body-md">
               <span class="material-symbols-outlined text-[18px]">logout</span> Logout
             </a>
           </div>
@@ -272,11 +255,11 @@
     <div class="bg-primary-container text-white p-lg rounded-xl shadow-sm flex flex-col justify-between">
       <div>
         <p class="font-label-md opacity-80">Halo,</p>
-        <h2 class="font-headline-md text-headline-md">Jane Doe</h2>
+        <h2 class="font-headline-md text-headline-md" id="welcome-name">Jane Doe</h2>
       </div>
       <div class="mt-md flex items-center gap-xs">
         <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">verified</span>
-        <span class="font-label-sm">Member Premium</span>
+        <span class="font-label-sm" id="welcome-role">Member</span>
       </div>
     </div>
     <a href="riwayat.html" class="bg-surface-container-lowest border border-outline-variant p-lg rounded-xl shadow-sm flex items-center gap-lg hover:shadow-md transition-shadow cursor-pointer">
@@ -285,9 +268,10 @@
       </div>
       <div>
         <h3 class="font-label-sm text-on-surface-variant uppercase tracking-wider">Buku Dipinjam</h3>
-        <p class="font-headline-md text-headline-md">4 Buku</p>
-        <p class="text-secondary font-label-sm flex items-center gap-1 mt-1">
-          <span class="material-symbols-outlined text-[14px]">event_repeat</span> Jatuh tempo 3 hari lagi
+        <p class="font-headline-md text-headline-md" id="stat-jumlah-pinjam">0 Buku</p>
+        <p class="text-secondary font-label-sm flex items-center gap-1 mt-1" id="stat-jatuh-tempo-wrap">
+          <span class="material-symbols-outlined text-[14px]">event_repeat</span>
+          <span id="stat-jatuh-tempo-text">Tidak ada pinjaman aktif</span>
         </p>
       </div>
     </a>
@@ -297,9 +281,10 @@
       </div>
       <div>
         <h3 class="font-label-sm text-on-surface-variant uppercase tracking-wider">Denda</h3>
-        <p class="font-headline-md text-headline-md">Rp 12.500</p>
-        <p class="text-error font-label-sm flex items-center gap-1 mt-1">
-          <span class="material-symbols-outlined text-[14px]">report</span> 1 Item Overdue
+        <p class="font-headline-md text-headline-md" id="stat-denda">Rp 0</p>
+        <p class="text-error font-label-sm flex items-center gap-1 mt-1" id="stat-overdue-wrap">
+          <span class="material-symbols-outlined text-[14px]">report</span>
+          <span id="stat-overdue-text">Tidak ada item overdue</span>
         </p>
       </div>
     </a>
@@ -398,7 +383,7 @@
       <span class="material-symbols-outlined text-[48px] text-outline">search_off</span>
       <p class="font-body-md text-on-surface-variant mt-md">Tidak ada buku yang sesuai.</p>
     </div>
-    <div class="mt-xl flex justify-center" id="load-more-wrap">
+    <div class="mt-xl flex justify-center hidden" id="load-more-wrap">
       <button id="load-more-btn" onclick="loadMore()" class="border border-primary text-primary px-lg py-md rounded-full font-label-md hover:bg-primary-fixed transition-all active:scale-95">
         Load More Titles
       </button>
@@ -443,11 +428,11 @@
 
 <!-- BOTTOM NAVIGATION (Mobile) -->
 <nav class="md:hidden fixed bottom-0 left-0 w-full z-30 flex justify-around items-center py-2 bg-surface border-t border-outline-variant">
-  <a class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1 active:scale-90 transition-transform" href="catalog.html">
+  <a class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1 active:scale-90 transition-transform" href="katalog.html">
     <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
     <span class="font-label-sm text-[10px]">Dashboard</span>
   </a>
-  <a class="flex flex-col items-center justify-center text-on-surface-variant active:scale-90 transition-transform" href="catalog.html">
+  <a class="flex flex-col items-center justify-center text-on-surface-variant active:scale-90 transition-transform" href="katalog.html">
     <span class="material-symbols-outlined">auto_stories</span>
     <span class="font-label-sm text-[10px]">Catalog</span>
   </a>
@@ -476,33 +461,211 @@
 </button>
 
 <script>
-  // ===== DATA BUKU =====
-  const allBooks = [
-    { title: "Design for the Real World", author: "Victor Papanek", category: "Design", status: "Available", img: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=400" },
-    { title: "Sapiens: A Brief History", author: "Yuval Noah Harari", category: "Sejarah", status: "Borrowed", img: "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=400" },
-    { title: "The Design of Everyday Things", author: "Don Norman", category: "Design", status: "Available", img: "https://images.unsplash.com/photo-1541963463532-d68292c34b19?auto=format&fit=crop&q=80&w=400" },
-    { title: "Thinking, Fast and Slow", author: "Daniel Kahneman", category: "Sains", status: "Available", img: "https://images.unsplash.com/photo-1532012197267-da84d127e765?auto=format&fit=crop&q=80&w=400" },
-    { title: "Brief Answers to the Big Questions", author: "Stephen Hawking", category: "Sains", status: "Borrowed", img: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&q=80&w=400" },
-    { title: "The Great Gatsby", author: "F. Scott Fitzgerald", category: "Fiksi", status: "Available", img: "https://images.unsplash.com/photo-1541963463532-d68292c34b19?auto=format&fit=crop&q=80&w=400" },
-    { title: "A Promised Land", author: "Barack Obama", category: "Sejarah", status: "Available", img: "https://images.unsplash.com/photo-1589998059171-988d887df646?auto=format&fit=crop&q=80&w=400" },
-    { title: "Invisible Women", author: "Caroline Criado Perez", category: "Sains", status: "Available", img: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=400" },
-    { title: "Clean Code", author: "Robert C. Martin", category: "Teknologi", status: "Available", img: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=400" },
-    { title: "The Pragmatic Programmer", author: "David Thomas", category: "Teknologi", status: "Borrowed", img: "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&q=80&w=400" },
-    { title: "Dune", author: "Frank Herbert", category: "Fiksi", status: "Available", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400" },
-    { title: "Sejarah Indonesia Modern", author: "M.C. Ricklefs", category: "Sejarah", status: "Available", img: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&q=80&w=400" },
-  ];
+  // ===== KONFIGURASI API =====
+  const API_BASE_URL = 'http://localhost:5000/api';
 
-  const extraBooks = [
-    { title: "Atomic Habits", author: "James Clear", category: "Sains", status: "Available", img: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&q=80&w=400" },
-    { title: "You Look Like a Thing and I Love You", author: "Janelle Shane", category: "Teknologi", status: "Available", img: "https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&q=80&w=400" },
-    { title: "Laskar Pelangi", author: "Andrea Hirata", category: "Fiksi", status: "Available", img: "https://images.unsplash.com/photo-1476275466078-4007374efbbe?auto=format&fit=crop&q=80&w=400" },
-    { title: "Brief History of Time", author: "Stephen Hawking", category: "Sains", status: "Borrowed", img: "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&q=80&w=400" },
-  ];
+  // ===== USER SESSION =====
+  const currentUser = JSON.parse(localStorage.getItem('athenaeum_current_user') || 'null');
+  const token = localStorage.getItem('athenaeum_token');
 
+  function loadUserSession() {
+    fetchDashboardStats();
+    fetchNotifDropdown();
+    if (!currentUser) return;
+
+    const initials = currentUser.name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+    const roleLabel = currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1);
+
+    document.getElementById('drawer-initials').textContent = initials;
+    document.getElementById('drawer-name').textContent = currentUser.name;
+    document.getElementById('drawer-role').textContent = roleLabel;
+
+    document.getElementById('header-initials').textContent = initials;
+    document.getElementById('header-name').textContent = currentUser.name;
+    document.getElementById('header-role').textContent = roleLabel;
+
+    document.getElementById('welcome-name').textContent = currentUser.name;
+    document.getElementById('welcome-role').textContent = roleLabel;
+  }
+
+  function logoutUser() {
+    localStorage.removeItem('athenaeum_current_user');
+    localStorage.removeItem('athenaeum_token');
+    window.location.href = 'index.html';
+  }
+
+  loadUserSession();
+
+  // ===== STATE =====
+  let allBooks = []; // diisi dari API
   let currentCategoryFilter = 'Semua';
   let currentStatusFilter = 'Semua';
   let currentSort = 'default';
-  let extraLoaded = false;
+
+  // ===== FETCH BUKU DARI API =====
+  async function fetchBooks() {
+    const grid = document.getElementById('catalog-grid');
+    grid.innerHTML = `<div class="col-span-4 text-center py-xl text-on-surface-variant">
+      <span class="material-symbols-outlined text-[48px] animate-spin">sync</span>
+      <p class="mt-md font-body-md">Memuat katalog buku...</p>
+    </div>`;
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/books`);
+      const data = await res.json();
+      allBooks = data;
+      applyFilters();
+      document.getElementById('load-more-wrap').classList.add('hidden'); // semua buku langsung ditampil dari API
+    } catch (err) {
+      grid.innerHTML = `<div class="col-span-4 text-center py-xl text-error">
+        <span class="material-symbols-outlined text-[48px]">cloud_off</span>
+        <p class="mt-md font-body-md">Gagal memuat buku. Pastikan backend jalan di ${API_BASE_URL}</p>
+      </div>`;
+    }
+  }
+
+  // Stub — semua buku sudah ditampilkan sekaligus dari API,
+  // tombol ini disembunyikan otomatis, tapi fungsi tetap disediakan
+  // supaya tidak error kalau ada yang memanggilnya.
+  function loadMore() {
+    console.log('Semua buku sudah ditampilkan.');
+  }
+
+  // ===== DASHBOARD STATS (dari data pinjaman user yang login) =====
+  async function fetchDashboardStats() {
+    if (!token) return; // belum login, skip
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/books/my-loans`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('Gagal mengambil data pinjaman');
+
+      const loans = await res.json(); // array buku yang sedang dipinjam user ini
+      const now = new Date();
+
+      // Hitung buku overdue & sisa hari untuk masing-masing
+      let overdueCount = 0;
+      let totalDenda = 0;
+      let nearestDueDays = null;
+
+      loans.forEach(book => {
+        const due = new Date(book.dueDate);
+        const diffMs = due - now;
+        const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+        if (diffDays < 0) {
+          // sudah lewat jatuh tempo -> overdue, kena denda
+          overdueCount++;
+          totalDenda += Math.abs(diffDays) * 1000; // Rp 1.000/hari telat
+        } else {
+          // belum lewat -> catat yang paling dekat jatuh temponya
+          if (nearestDueDays === null || diffDays < nearestDueDays) {
+            nearestDueDays = diffDays;
+          }
+        }
+      });
+
+      // ===== Update UI: Buku Dipinjam =====
+      document.getElementById('stat-jumlah-pinjam').textContent = `${loans.length} Buku`;
+
+      const jatuhTempoText = document.getElementById('stat-jatuh-tempo-text');
+      if (loans.length === 0) {
+        jatuhTempoText.textContent = 'Tidak ada pinjaman aktif';
+      } else if (nearestDueDays !== null) {
+        jatuhTempoText.textContent = nearestDueDays === 0
+          ? 'Jatuh tempo hari ini'
+          : `Jatuh tempo ${nearestDueDays} hari lagi`;
+      } else {
+        jatuhTempoText.textContent = 'Semua buku sudah melewati tenggat';
+      }
+
+      // ===== Update UI: Denda =====
+      document.getElementById('stat-denda').textContent =
+        `Rp ${totalDenda.toLocaleString('id-ID')}`;
+
+      const overdueText = document.getElementById('stat-overdue-text');
+      overdueText.textContent = overdueCount === 0
+        ? 'Tidak ada item overdue'
+        : `${overdueCount} Item Overdue`;
+
+    } catch (err) {
+      console.error('Gagal memuat statistik dashboard:', err);
+    }
+  }
+
+  // ===== NOTIFIKASI DROPDOWN (ambil dari API, bukan hardcode) =====
+  let notifDropdownData = [];
+
+  function formatWaktuSingkat(iso) {
+    if (!iso) return '-';
+    const d = new Date(iso);
+    if (isNaN(d)) return iso;
+    const diffMs = Date.now() - d.getTime();
+    const diffH = Math.floor(diffMs / (1000*60*60));
+    if (diffH < 1) return 'Baru saja';
+    if (diffH < 24) return `${diffH} jam lalu`;
+    const diffD = Math.floor(diffH / 24);
+    if (diffD < 7) return `${diffD} hari lalu`;
+    return d.toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' });
+  }
+
+  const iconByType = {
+    overdue: { icon:'report', color:'text-error' },
+    due_soon: { icon:'event_repeat', color:'text-secondary' },
+    book_available: { icon:'bookmark_added', color:'text-primary' },
+    fine: { icon:'payments', color:'text-error' },
+    loan_confirmed: { icon:'verified', color:'text-secondary' },
+    membership: { icon:'local_library', color:'text-primary' },
+    default: { icon:'notifications', color:'text-on-surface-variant' },
+  };
+
+  async function fetchNotifDropdown() {
+    const list = document.getElementById('notif-dropdown-list');
+    if (!token) {
+      list.innerHTML = `<div class="px-md py-lg text-center text-on-surface-variant font-body-sm">Silakan login untuk melihat notifikasi.</div>`;
+      return;
+    }
+    try {
+      const res = await fetch(`${API_BASE_URL}/notifications`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('Gagal memuat notifikasi');
+      const data = await res.json();
+
+      // dropdown cuma nampilin 5 notifikasi paling baru
+      notifDropdownData = data.slice(0, 5);
+      renderNotifDropdown();
+
+      const anyUnread = data.some(n => !n.read);
+      document.getElementById('notif-dot').classList.toggle('hidden', !anyUnread);
+    } catch (err) {
+      console.error('Gagal memuat notifikasi dropdown:', err);
+      list.innerHTML = `<div class="px-md py-lg text-center text-error font-body-sm">Gagal memuat notifikasi.</div>`;
+    }
+  }
+
+  function renderNotifDropdown() {
+    const list = document.getElementById('notif-dropdown-list');
+    if (!notifDropdownData.length) {
+      list.innerHTML = `<div class="px-md py-lg text-center text-on-surface-variant font-body-sm">Belum ada notifikasi.</div>`;
+      return;
+    }
+    list.innerHTML = '';
+    notifDropdownData.forEach(n => {
+      const meta = iconByType[n.type] || iconByType.default;
+      list.insertAdjacentHTML('beforeend', `
+        <div class="notif-unread px-md py-sm ${n.read ? '' : 'bg-primary-fixed/20'} flex gap-sm items-start">
+          <span class="material-symbols-outlined ${meta.color} text-[20px] mt-0.5">${meta.icon}</span>
+          <div>
+            <p class="font-body-sm text-on-surface ${n.read ? '' : 'font-semibold'}">${n.title}</p>
+            <p class="font-body-sm text-on-surface-variant">${n.message}</p>
+            <p class="font-label-sm text-outline mt-xs">${formatWaktuSingkat(n.createdAt)}</p>
+          </div>
+        </div>
+      `);
+    });
+  }
 
   // ===== RENDER CATALOG =====
   function renderCatalog(books) {
@@ -519,7 +682,7 @@
       grid.insertAdjacentHTML('beforeend', `
         <div class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col h-full group">
           <div class="relative w-full aspect-[4/3] rounded-lg overflow-hidden mb-md">
-            <img src="${book.img}" alt="${book.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+            <img src="${book.img || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=400'}" alt="${book.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
             <div class="absolute top-2 right-2">
               <span class="${isAvailable ? 'bg-secondary-container text-on-secondary-container' : 'bg-surface-container-highest text-on-surface-variant'} px-2 py-0.5 rounded-full text-xs font-bold shadow-sm">
                 ${isAvailable ? 'Tersedia' : 'Dipinjam'}
@@ -531,7 +694,12 @@
             <h3 class="font-headline-md text-body-md text-on-surface leading-tight line-clamp-2 mb-1">${book.title}</h3>
             <p class="text-on-surface-variant font-body-sm mb-md">${book.author}</p>
           </div>
-          <button onclick="${isAvailable ? `openBorrowModal('${book.title.replace(/'/g,"\\'")}','${book.author.replace(/'/g,"\\'")}','Available')` : ''}"
+          <button
+            data-id="${book._id}"
+            data-title="${book.title.replace(/"/g,'&quot;')}"
+            data-author="${book.author.replace(/"/g,'&quot;')}"
+            data-status="${book.status}"
+            onclick="handleBorrowClick(this)"
             class="w-full py-2 px-4 ${isAvailable ? 'bg-secondary text-white hover:bg-on-secondary-fixed-variant cursor-pointer' : 'bg-surface-container text-outline cursor-not-allowed'} rounded-lg font-label-md transition-colors flex items-center justify-center gap-2 active:scale-95 duration-150"
             ${isAvailable ? '' : 'disabled'}>
             <span class="material-symbols-outlined text-[18px]">bookmark_add</span>
@@ -540,6 +708,11 @@
         </div>
       `);
     });
+  }
+
+  function handleBorrowClick(btn) {
+    if (btn.dataset.status !== 'Available') return;
+    openBorrowModal(btn.dataset.id, btn.dataset.title, btn.dataset.author);
   }
 
   // ===== FILTER & SORT =====
@@ -561,7 +734,7 @@
   function sortBooks(val) { currentSort = val; applyFilters(); }
 
   function applyFilters() {
-    let pool = extraLoaded ? [...allBooks, ...extraBooks] : [...allBooks];
+    let pool = [...allBooks];
     if (currentCategoryFilter !== 'Semua') pool = pool.filter(b => b.category === currentCategoryFilter);
     if (currentStatusFilter !== 'Semua') pool = pool.filter(b => b.status === currentStatusFilter);
     if (currentSort === 'az') pool.sort((a,b) => a.title.localeCompare(b.title));
@@ -581,17 +754,6 @@
     filterByCategory('Semua');
   }
 
-  function loadMore() {
-    if (!extraLoaded) {
-      extraLoaded = true;
-      applyFilters();
-      const btn = document.getElementById('load-more-btn');
-      btn.textContent = 'Semua buku sudah dimuat';
-      btn.disabled = true;
-      btn.classList.add('opacity-50','cursor-not-allowed');
-    }
-  }
-
   function scrollToCatalog() {
     document.getElementById('catalog-section').scrollIntoView({ behavior: 'smooth' });
   }
@@ -603,7 +765,6 @@
   }
   function closeDrawer() {
     document.getElementById('drawer').classList.remove('open');
-    // Hanya tutup overlay kalau tidak ada dropdown yang buka
     if (!document.getElementById('notif-dropdown').classList.contains('show') &&
         !document.getElementById('profile-dropdown').classList.contains('show')) {
       closeOverlay();
@@ -622,30 +783,39 @@
 
   // ===== NOTIF =====
   function toggleNotif(e) {
-    e.stopPropagation(); // Cegah event naik ke atas
+    e.stopPropagation();
     const d = document.getElementById('notif-dropdown');
     const p = document.getElementById('profile-dropdown');
     p.classList.remove('show');
+    const willOpen = !d.classList.contains('show');
     d.classList.toggle('show');
-    // Dropdown notif TIDAK pakai overlay agar link navbar tetap bisa diklik
+    if (willOpen) fetchNotifDropdown(); // refresh setiap kali dibuka
   }
 
-  function markAllRead() {
-    document.querySelectorAll('.notif-unread').forEach(el => {
+  async function markAllRead() {
+    document.querySelectorAll('#notif-dropdown-list .notif-unread').forEach(el => {
       el.classList.remove('bg-primary-fixed/20');
     });
-    const dot = document.getElementById('notif-dot');
-    if (dot) dot.remove();
+    document.getElementById('notif-dot').classList.add('hidden');
+
+    if (!token) return;
+    try {
+      await fetch(`${API_BASE_URL}/notifications/read-all`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+    } catch (err) {
+      console.error('Gagal menandai semua notifikasi sebagai dibaca:', err);
+    }
   }
 
   // ===== PROFILE DROPDOWN =====
   function toggleProfile(e) {
-    e.stopPropagation(); // Cegah event naik ke atas
+    e.stopPropagation();
     const d = document.getElementById('profile-dropdown');
     const n = document.getElementById('notif-dropdown');
     n.classList.remove('show');
     d.classList.toggle('show');
-    // Dropdown profil TIDAK pakai overlay agar link navbar tetap bisa diklik
   }
 
   // ===== ADVANCED FILTER PANEL =====
@@ -654,23 +824,61 @@
   }
 
   // ===== MODAL PINJAM =====
-  function openBorrowModal(title, author, status) {
-    if (status !== 'Available') return;
+  let selectedBookId = null;
+
+  function openBorrowModal(bookId, title, author) {
+    selectedBookId = bookId;
     document.getElementById('modal-book-title').textContent = title;
     document.getElementById('modal-book-author').textContent = author;
     document.getElementById('modal-backdrop').classList.add('show');
     showOverlay();
   }
   function closeBorrowModal() {
+    selectedBookId = null;
     document.getElementById('modal-backdrop').classList.remove('show');
     if (!document.getElementById('drawer').classList.contains('open')) {
       closeOverlay();
     }
   }
-  function confirmBorrow() {
-    const title = document.getElementById('modal-book-title').textContent;
-    closeBorrowModal();
-    showToast(`"${title}" berhasil dipinjam!`);
+  async function confirmBorrow() {
+    if (!selectedBookId) return;
+
+    const confirmBtn = document.querySelector('#modal-backdrop button:last-child');
+    const originalHTML = confirmBtn.innerHTML;
+    confirmBtn.disabled = true;
+    confirmBtn.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin">sync</span> Memproses...';
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/books/${selectedBookId}/borrow`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        closeBorrowModal();
+        showToast('❌ ' + (data.message || 'Gagal meminjam buku.'));
+        return;
+      }
+
+      const title = document.getElementById('modal-book-title').textContent;
+      closeBorrowModal();
+      showToast(`"${title}" berhasil dipinjam!`);
+
+      // Refresh data buku & statistik dashboard biar langsung update
+      await fetchBooks();
+      await fetchDashboardStats();
+      await fetchNotifDropdown();
+    } catch (err) {
+      closeBorrowModal();
+      showToast('❌ Gagal menghubungi server.');
+    } finally {
+      confirmBtn.disabled = false;
+      confirmBtn.innerHTML = originalHTML;
+    }
   }
 
   // ===== TOAST =====
@@ -683,27 +891,21 @@
     setTimeout(() => toast.remove(), 3000);
   }
 
-  // ===== CLOSE ALL (dipanggil saat klik overlay) =====
+  // ===== CLOSE ALL =====
   function closeAll() {
-    // Tutup drawer
     document.getElementById('drawer').classList.remove('open');
-    // Tutup dropdown
     document.getElementById('notif-dropdown').classList.remove('show');
     document.getElementById('profile-dropdown').classList.remove('show');
-    // Tutup modal
     document.getElementById('modal-backdrop').classList.remove('show');
-    // Tutup overlay
     closeOverlay();
   }
 
-  // Klik di luar dropdown = tutup dropdown (tanpa overlay)
   document.addEventListener('click', function() {
     document.getElementById('notif-dropdown').classList.remove('show');
     document.getElementById('profile-dropdown').classList.remove('show');
   });
 
-  // Inisialisasi
-  renderCatalog(allBooks);
+  fetchBooks();
 </script>
 </body>
 </html>

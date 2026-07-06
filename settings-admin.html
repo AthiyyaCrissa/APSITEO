@@ -36,6 +36,8 @@
 </script>
 </head>
 <body class="bg-surface text-on-surface">
+<script>window.ATHENAEUM_ALLOWED_ROLES = ['admin'];</script>
+<script src="auth-guard.js"></script>
 
 <header class="bg-surface shadow-sm sticky top-0 z-40 h-16 flex justify-between items-center w-full px-lg max-w-container-max mx-auto">
   <div class="flex items-center gap-md">
@@ -43,7 +45,7 @@
     <h1 class="font-headline-md text-headline-md font-bold text-primary">Athenaeum Library</h1>
   </div>
   <span class="hidden md:block font-label-md text-on-surface-variant">Admin</span>
-  <a href="index.html" class="material-symbols-outlined text-on-surface-variant hover:text-error transition-colors" title="Logout">logout</a>
+  <a href="#" onclick="logoutUser(); return false;" class="material-symbols-outlined text-on-surface-variant hover:text-error transition-colors" title="Logout">logout</a>
 </header>
 
 <div class="flex max-w-container-max mx-auto min-h-screen">
@@ -80,7 +82,7 @@
       <p class="font-body-md text-on-surface-variant">Konfigurasi sistem perpustakaan.</p>
     </div>
 
-    <div class="max-w-4xl space-y-lg">
+    <div class="max-w-4xl space-y-lg" id="settings-wrap">
       <!-- Pengaturan Umum -->
       <section class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
         <div class="px-lg py-md border-b border-outline-variant bg-surface-container-low">
@@ -89,19 +91,19 @@
         <div class="divide-y divide-outline-variant">
           <div class="px-lg py-md">
             <label class="font-label-md text-on-surface-variant block mb-xs">Nama Perpustakaan</label>
-            <input type="text" value="Athenaeum Library" class="w-full border border-outline-variant rounded-lg py-2 px-md focus:ring-2 focus:ring-primary bg-white font-body-md"/>
+            <input id="set-nama" type="text" class="w-full border border-outline-variant rounded-lg py-2 px-md focus:ring-2 focus:ring-primary bg-white font-body-md"/>
           </div>
           <div class="px-lg py-md">
             <label class="font-label-md text-on-surface-variant block mb-xs">Durasi Pinjam Default (hari)</label>
-            <input type="number" value="14" min="1" max="60" class="w-full border border-outline-variant rounded-lg py-2 px-md focus:ring-2 focus:ring-primary bg-white font-body-md"/>
+            <input id="set-durasi" type="number" min="1" max="60" class="w-full border border-outline-variant rounded-lg py-2 px-md focus:ring-2 focus:ring-primary bg-white font-body-md"/>
           </div>
           <div class="px-lg py-md">
             <label class="font-label-md text-on-surface-variant block mb-xs">Denda Keterlambatan (Rp/hari)</label>
-            <input type="number" value="1000" min="0" class="w-full border border-outline-variant rounded-lg py-2 px-md focus:ring-2 focus:ring-primary bg-white font-body-md"/>
+            <input id="set-denda" type="number" min="0" class="w-full border border-outline-variant rounded-lg py-2 px-md focus:ring-2 focus:ring-primary bg-white font-body-md"/>
           </div>
           <div class="px-lg py-md">
             <label class="font-label-md text-on-surface-variant block mb-xs">Maksimal Buku Dipinjam (per anggota)</label>
-            <input type="number" value="7" min="1" max="20" class="w-full border border-outline-variant rounded-lg py-2 px-md focus:ring-2 focus:ring-primary bg-white font-body-md"/>
+            <input id="set-maks-pinjam" type="number" min="1" max="20" class="w-full border border-outline-variant rounded-lg py-2 px-md focus:ring-2 focus:ring-primary bg-white font-body-md"/>
           </div>
         </div>
       </section>
@@ -118,7 +120,7 @@
               <p class="font-body-sm text-on-surface-variant">Kirim pengingat H-3 sebelum jatuh tempo</p>
             </div>
             <label class="relative cursor-pointer flex-shrink-0">
-              <input type="checkbox" class="toggle-input sr-only" checked onchange="simpanToggle(this, 'notif-jatuh-tempo')"/>
+              <input id="set-notif-jatuh-tempo" type="checkbox" class="toggle-input sr-only"/>
               <div class="toggle-track"><div class="toggle-thumb"></div></div>
             </label>
           </div>
@@ -128,7 +130,7 @@
               <p class="font-body-sm text-on-surface-variant">Kirim peringatan jika buku melewati batas kembali</p>
             </div>
             <label class="relative cursor-pointer flex-shrink-0">
-              <input type="checkbox" class="toggle-input sr-only" checked onchange="simpanToggle(this, 'notif-overdue')"/>
+              <input id="set-notif-overdue" type="checkbox" class="toggle-input sr-only"/>
               <div class="toggle-track"><div class="toggle-thumb"></div></div>
             </label>
           </div>
@@ -138,7 +140,7 @@
               <p class="font-body-sm text-on-surface-variant">Kirim notifikasi saat ada permintaan baru dari anggota</p>
             </div>
             <label class="relative cursor-pointer flex-shrink-0">
-              <input type="checkbox" class="toggle-input sr-only" checked onchange="simpanToggle(this, 'notif-permintaan')"/>
+              <input id="set-notif-permintaan" type="checkbox" class="toggle-input sr-only"/>
               <div class="toggle-track"><div class="toggle-thumb"></div></div>
             </label>
           </div>
@@ -148,7 +150,7 @@
       <!-- Tombol Aksi -->
       <div class="flex flex-wrap gap-md">
         <button onclick="resetPengaturan()" class="border border-outline-variant text-on-surface-variant px-lg py-sm rounded-lg font-label-md hover:bg-surface-container transition-colors">Reset</button>
-        <button onclick="simpanPengaturan()" class="flex items-center gap-sm bg-primary-container text-on-primary px-lg py-sm rounded-lg font-label-md hover:opacity-90 active:scale-95 transition-all">
+        <button id="btn-simpan" onclick="simpanPengaturan()" class="flex items-center gap-sm bg-primary-container text-on-primary px-lg py-sm rounded-lg font-label-md hover:opacity-90 active:scale-95 transition-all">
           <span class="material-symbols-outlined text-[18px]">save</span> Simpan Pengaturan
         </button>
       </div>
@@ -172,28 +174,22 @@
 </nav>
 
 <script>
-function tampilToast(msg) {
-  const existing = document.querySelector('.toast-notif');
-  if (existing) existing.remove();
-  const t = document.createElement('div');
-  t.className = 'toast-notif';
-  t.style.cssText = 'position:fixed;bottom:88px;left:50%;transform:translateX(-50%);background:#191c1e;color:#eff1f3;padding:10px 20px;border-radius:999px;z-index:99;font-size:14px;display:flex;align-items:center;gap:8px;white-space:nowrap;';
-  t.innerHTML = `<span class="material-symbols-outlined" style="font-size:16px;color:#6df5e1">check_circle</span>${msg}`;
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), 3000);
-}
+  // ===== KONFIGURASI API =====
+  const API_BASE_URL = 'http://localhost:5000/api';
+  const token = localStorage.getItem('athenaeum_token');
 
-function simpanToggle(el, key) {
-  tampilToast((el.checked ? 'Aktif: ' : 'Nonaktif: ') + key.replace(/-/g, ' '));
-}
-function simpanPengaturan() { tampilToast('Pengaturan berhasil disimpan!'); }
-function resetPengaturan() {
-  if (!confirm('Reset semua pengaturan ke default?')) return;
-  tampilToast('Pengaturan direset ke default.');
-}
+  function tampilToast(msg) {
+    const existing = document.querySelector('.toast-notif');
+    if (existing) existing.remove();
+    const t = document.createElement('div');
+    t.className = 'toast-notif';
+    t.style.cssText = 'position:fixed;bottom:88px;left:50%;transform:translateX(-50%);background:#191c1e;color:#eff1f3;padding:10px 20px;border-radius:999px;z-index:99;font-size:14px;display:flex;align-items:center;gap:8px;white-space:nowrap;';
+    t.innerHTML = `<span class="material-symbols-outlined" style="font-size:16px;color:#6df5e1">check_circle</span>${msg}`;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+  }
 
-document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('.toggle-input').forEach(cb => {
+  function syncToggleVisual(cb) {
     const track = cb.closest('label')?.querySelector('.toggle-track');
     if (!track) return;
     const thumb = track.querySelector('.toggle-thumb');
@@ -203,8 +199,89 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     set(cb.checked);
     cb.addEventListener('change', () => set(cb.checked));
-  });
-});
+  }
+
+  function isiForm(s) {
+    document.getElementById('set-nama').value = s.libraryName;
+    document.getElementById('set-durasi').value = s.loanDurationDays;
+    document.getElementById('set-denda').value = s.finePerDay;
+    document.getElementById('set-maks-pinjam').value = s.maxBorrowDefault;
+    document.getElementById('set-notif-jatuh-tempo').checked = s.notifDueSoon;
+    document.getElementById('set-notif-overdue').checked = s.notifOverdue;
+    document.getElementById('set-notif-permintaan').checked = s.notifNewRequest;
+    document.querySelectorAll('.toggle-input').forEach(syncToggleVisual);
+  }
+
+  async function fetchSettings() {
+    try {
+      const res = await fetch(`${API_BASE_URL}/settings`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('Gagal memuat pengaturan');
+      const s = await res.json();
+      isiForm(s);
+    } catch (err) {
+      console.error(err);
+      tampilToast('❌ Gagal memuat pengaturan dari server.');
+    }
+  }
+
+  async function simpanPengaturan() {
+    const payload = {
+      libraryName: document.getElementById('set-nama').value.trim(),
+      loanDurationDays: Number(document.getElementById('set-durasi').value),
+      finePerDay: Number(document.getElementById('set-denda').value),
+      maxBorrowDefault: Number(document.getElementById('set-maks-pinjam').value),
+      notifDueSoon: document.getElementById('set-notif-jatuh-tempo').checked,
+      notifOverdue: document.getElementById('set-notif-overdue').checked,
+      notifNewRequest: document.getElementById('set-notif-permintaan').checked,
+    };
+
+    const btn = document.getElementById('btn-simpan');
+    const original = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin">sync</span> Menyimpan...';
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/settings`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Gagal menyimpan pengaturan.');
+      tampilToast('Pengaturan berhasil disimpan!');
+    } catch (err) {
+      tampilToast('❌ ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = original;
+    }
+  }
+
+  async function resetPengaturan() {
+    if (!confirm('Reset semua pengaturan ke default?')) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/settings/reset`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Gagal mereset pengaturan.');
+      isiForm(data.settings);
+      tampilToast('Pengaturan direset ke default.');
+    } catch (err) {
+      tampilToast('❌ ' + err.message);
+    }
+  }
+
+  function logoutUser() {
+    localStorage.removeItem('athenaeum_current_user');
+    localStorage.removeItem('athenaeum_token');
+    window.location.href = 'index.html';
+  }
+
+  fetchSettings();
 </script>
 </body>
 </html>

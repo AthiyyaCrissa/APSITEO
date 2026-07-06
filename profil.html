@@ -51,6 +51,8 @@
 </script>
 </head>
 <body class="bg-surface text-on-surface font-body-md">
+<script>window.ATHENAEUM_ALLOWED_ROLES = ['member'];</script>
+<script src="auth-guard.js"></script>
 
 <!-- HEADER -->
 <header class="bg-surface shadow-sm fixed top-0 w-full z-30">
@@ -65,7 +67,7 @@
       <a class="text-primary font-bold border-b-2 border-primary py-2" href="profil.html">Profile</a>
     </nav>
     <div class="flex items-center gap-md">
-      <a href="index.html" class="material-symbols-outlined text-on-surface-variant hover:text-error transition-colors" title="Logout">logout</a>
+      <a href="#" onclick="logoutUser(); return false;" class="material-symbols-outlined text-on-surface-variant hover:text-error transition-colors" title="Logout">logout</a>
     </div>
   </div>
 </header>
@@ -75,20 +77,16 @@
   <!-- Profile Card -->
   <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-lg shadow-sm mb-xl flex flex-col md:flex-row items-center md:items-start gap-lg">
     <div class="relative">
-      <div class="w-24 h-24 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-3xl shadow-md">JD</div>
+      <div class="w-24 h-24 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-3xl shadow-md" id="avatar-initials">--</div>
       <button onclick="showToast('Fitur ganti foto segera hadir')" class="absolute bottom-0 right-0 w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center shadow hover:scale-110 transition-transform">
         <span class="material-symbols-outlined text-[16px]">photo_camera</span>
       </button>
     </div>
     <div class="flex-1 text-center md:text-left">
-      <h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface font-bold">Jane Doe</h2>
-      <p class="text-on-surface-variant font-body-md">jane.doe@email.com</p>
-      <div class="flex flex-wrap gap-sm mt-sm justify-center md:justify-start">
-        <span class="bg-primary-container text-on-primary-container px-md py-xs rounded-full font-label-sm flex items-center gap-1">
-          <span class="material-symbols-outlined text-[14px]" style="font-variation-settings:'FILL' 1;">verified</span> Premium Member
-        </span>
-        <span class="bg-surface-container text-on-surface-variant px-md py-xs rounded-full font-label-sm">ID: LIB-99231</span>
-        <span class="bg-secondary-container text-on-secondary-container px-md py-xs rounded-full font-label-sm">Aktif sejak 2021</span>
+      <h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface font-bold" id="profile-name">Memuat...</h2>
+      <p class="text-on-surface-variant font-body-md" id="profile-email">-</p>
+      <div class="flex flex-wrap gap-sm mt-sm justify-center md:justify-start" id="profile-badges">
+        <!-- diisi dinamis: tipe member, ID anggota, aktif sejak -->
       </div>
     </div>
     <button onclick="openEditModal()" class="flex items-center gap-sm border border-primary text-primary px-md py-sm rounded-lg font-label-md hover:bg-primary-fixed transition-colors active:scale-95">
@@ -99,19 +97,19 @@
   <!-- Stats -->
   <div class="grid grid-cols-2 md:grid-cols-4 gap-md mb-xl">
     <a href="riwayat.html" class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl text-center hover:shadow-md transition-shadow cursor-pointer">
-      <p class="font-headline-md text-headline-md text-primary">47</p>
+      <p class="font-headline-md text-headline-md text-primary" id="stat-total-pinjam">-</p>
       <p class="font-label-sm text-on-surface-variant mt-xs">Total Dipinjam</p>
     </a>
     <a href="riwayat.html" class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl text-center hover:shadow-md transition-shadow cursor-pointer">
-      <p class="font-headline-md text-headline-md text-secondary">4</p>
+      <p class="font-headline-md text-headline-md text-secondary" id="stat-sedang-pinjam">-</p>
       <p class="font-label-sm text-on-surface-variant mt-xs">Sedang Dipinjam</p>
     </a>
     <a href="denda.html" class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl text-center hover:shadow-md transition-shadow cursor-pointer">
-      <p class="font-headline-md text-headline-md text-error">Rp 12.500</p>
+      <p class="font-headline-md text-headline-md text-error" id="stat-denda-aktif">-</p>
       <p class="font-label-sm text-on-surface-variant mt-xs">Denda Aktif</p>
     </a>
     <div class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl text-center">
-      <p class="font-headline-md text-headline-md text-on-surface">3</p>
+      <p class="font-headline-md text-headline-md text-on-surface" id="stat-kuota-sisa">-</p>
       <p class="font-label-sm text-on-surface-variant mt-xs">Kuota Tersisa</p>
     </div>
   </div>
@@ -131,31 +129,31 @@
           <span class="font-label-md text-on-surface-variant flex items-center gap-sm">
             <span class="material-symbols-outlined text-[18px]">person</span> Nama Lengkap
           </span>
-          <span class="font-body-md text-on-surface">Jane Doe</span>
+          <span class="font-body-md text-on-surface" id="info-nama">-</span>
         </div>
         <div class="px-lg py-sm flex justify-between items-center">
           <span class="font-label-md text-on-surface-variant flex items-center gap-sm">
             <span class="material-symbols-outlined text-[18px]">mail</span> Email
           </span>
-          <span class="font-body-md text-on-surface">jane.doe@email.com</span>
+          <span class="font-body-md text-on-surface" id="info-email">-</span>
         </div>
         <div class="px-lg py-sm flex justify-between items-center">
           <span class="font-label-md text-on-surface-variant flex items-center gap-sm">
             <span class="material-symbols-outlined text-[18px]">phone</span> Telepon
           </span>
-          <span class="font-body-md text-on-surface">+62 812-3456-7890</span>
+          <span class="font-body-md text-on-surface" id="info-telepon">-</span>
         </div>
         <div class="px-lg py-sm flex justify-between items-center">
           <span class="font-label-md text-on-surface-variant flex items-center gap-sm">
             <span class="material-symbols-outlined text-[18px]">cake</span> Tgl. Lahir
           </span>
-          <span class="font-body-md text-on-surface">14 Maret 1998</span>
+          <span class="font-body-md text-on-surface" id="info-tgl-lahir">-</span>
         </div>
         <div class="px-lg py-sm flex justify-between items-center">
           <span class="font-label-md text-on-surface-variant flex items-center gap-sm">
             <span class="material-symbols-outlined text-[18px]">location_on</span> Alamat
           </span>
-          <span class="font-body-md text-on-surface">Surabaya, Jawa Timur</span>
+          <span class="font-body-md text-on-surface" id="info-alamat">-</span>
         </div>
       </div>
     </div>
@@ -170,31 +168,31 @@
           <span class="font-label-md text-on-surface-variant flex items-center gap-sm">
             <span class="material-symbols-outlined text-[18px]">badge</span> ID Anggota
           </span>
-          <span class="font-body-md text-on-surface font-bold">LIB-99231</span>
+          <span class="font-body-md text-on-surface font-bold" id="member-id">-</span>
         </div>
         <div class="px-lg py-sm flex justify-between items-center">
           <span class="font-label-md text-on-surface-variant flex items-center gap-sm">
             <span class="material-symbols-outlined text-[18px]">star</span> Tipe
           </span>
-          <span class="bg-primary-container text-on-primary-container px-sm py-xs rounded-full font-label-sm">Premium</span>
+          <span class="bg-primary-container text-on-primary-container px-sm py-xs rounded-full font-label-sm" id="member-type">-</span>
         </div>
         <div class="px-lg py-sm flex justify-between items-center">
           <span class="font-label-md text-on-surface-variant flex items-center gap-sm">
             <span class="material-symbols-outlined text-[18px]">event</span> Bergabung
           </span>
-          <span class="font-body-md text-on-surface">1 Jan 2021</span>
+          <span class="font-body-md text-on-surface" id="member-joined">-</span>
         </div>
         <div class="px-lg py-sm flex justify-between items-center">
           <span class="font-label-md text-on-surface-variant flex items-center gap-sm">
             <span class="material-symbols-outlined text-[18px]">event_available</span> Berlaku s.d.
           </span>
-          <span class="font-body-md text-on-surface">31 Des 2025</span>
+          <span class="font-body-md text-on-surface" id="member-expiry">-</span>
         </div>
         <div class="px-lg py-sm flex justify-between items-center">
           <span class="font-label-md text-on-surface-variant flex items-center gap-sm">
             <span class="material-symbols-outlined text-[18px]">library_books</span> Maks. Pinjam
           </span>
-          <span class="font-body-md text-on-surface">7 buku</span>
+          <span class="font-body-md text-on-surface" id="member-max-pinjam">-</span>
         </div>
       </div>
       <div class="px-lg py-md">
@@ -214,17 +212,17 @@
       <div class="space-y-md max-w-md">
         <div>
           <label class="font-label-md text-on-surface-variant block mb-xs">Password Lama</label>
-          <input type="password" placeholder="Masukkan password lama" class="w-full border border-outline-variant rounded-lg py-2 px-md focus:ring-1 focus:ring-primary bg-white"/>
+          <input id="pw-old" type="password" placeholder="Masukkan password lama" class="w-full border border-outline-variant rounded-lg py-2 px-md focus:ring-1 focus:ring-primary bg-white"/>
         </div>
         <div>
           <label class="font-label-md text-on-surface-variant block mb-xs">Password Baru</label>
-          <input type="password" placeholder="Minimal 8 karakter" class="w-full border border-outline-variant rounded-lg py-2 px-md focus:ring-1 focus:ring-primary bg-white"/>
+          <input id="pw-new" type="password" placeholder="Minimal 8 karakter" class="w-full border border-outline-variant rounded-lg py-2 px-md focus:ring-1 focus:ring-primary bg-white"/>
         </div>
         <div>
           <label class="font-label-md text-on-surface-variant block mb-xs">Konfirmasi Password Baru</label>
-          <input type="password" placeholder="Ulangi password baru" class="w-full border border-outline-variant rounded-lg py-2 px-md focus:ring-1 focus:ring-primary bg-white"/>
+          <input id="pw-confirm" type="password" placeholder="Ulangi password baru" class="w-full border border-outline-variant rounded-lg py-2 px-md focus:ring-1 focus:ring-primary bg-white"/>
         </div>
-        <button onclick="showToast('Password berhasil diperbarui!')" class="bg-primary-container text-on-primary px-lg py-2 rounded-lg font-label-md hover:bg-primary-container/90 active:scale-95 transition-all">
+        <button id="pw-save-btn" onclick="savePassword()" class="bg-primary-container text-on-primary px-lg py-2 rounded-lg font-label-md hover:bg-primary-container/90 active:scale-95 transition-all">
           Simpan Password
         </button>
       </div>
@@ -243,24 +241,28 @@
     <div class="space-y-md">
       <div>
         <label class="font-label-md text-on-surface-variant block mb-xs">Nama Lengkap</label>
-        <input type="text" value="Jane Doe" class="w-full border border-outline-variant rounded-lg py-2 px-md focus:ring-1 focus:ring-primary bg-white"/>
+        <input id="edit-nama" type="text" class="w-full border border-outline-variant rounded-lg py-2 px-md focus:ring-1 focus:ring-primary bg-white"/>
       </div>
       <div>
         <label class="font-label-md text-on-surface-variant block mb-xs">Email</label>
-        <input type="email" value="jane.doe@email.com" class="w-full border border-outline-variant rounded-lg py-2 px-md focus:ring-1 focus:ring-primary bg-white"/>
+        <input id="edit-email" type="email" class="w-full border border-outline-variant rounded-lg py-2 px-md focus:ring-1 focus:ring-primary bg-white"/>
       </div>
       <div>
         <label class="font-label-md text-on-surface-variant block mb-xs">Telepon</label>
-        <input type="text" value="+62 812-3456-7890" class="w-full border border-outline-variant rounded-lg py-2 px-md focus:ring-1 focus:ring-primary bg-white"/>
+        <input id="edit-telepon" type="text" class="w-full border border-outline-variant rounded-lg py-2 px-md focus:ring-1 focus:ring-primary bg-white"/>
+      </div>
+      <div>
+        <label class="font-label-md text-on-surface-variant block mb-xs">Tanggal Lahir</label>
+        <input id="edit-tgl-lahir" type="date" class="w-full border border-outline-variant rounded-lg py-2 px-md focus:ring-1 focus:ring-primary bg-white"/>
       </div>
       <div>
         <label class="font-label-md text-on-surface-variant block mb-xs">Alamat</label>
-        <input type="text" value="Surabaya, Jawa Timur" class="w-full border border-outline-variant rounded-lg py-2 px-md focus:ring-1 focus:ring-primary bg-white"/>
+        <input id="edit-alamat" type="text" class="w-full border border-outline-variant rounded-lg py-2 px-md focus:ring-1 focus:ring-primary bg-white"/>
       </div>
     </div>
     <div class="flex gap-sm mt-lg">
       <button onclick="closeEditModal()" class="flex-1 border border-outline-variant text-on-surface-variant py-3 rounded-lg font-label-md hover:bg-surface-container transition-colors">Batal</button>
-      <button onclick="saveEdit()" class="flex-1 bg-primary-container text-on-primary py-3 rounded-lg font-label-md hover:bg-primary-container/90 active:scale-[0.98] transition-all">Simpan</button>
+      <button id="edit-save-btn" onclick="saveEdit()" class="flex-1 bg-primary-container text-on-primary py-3 rounded-lg font-label-md hover:bg-primary-container/90 active:scale-[0.98] transition-all">Simpan</button>
     </div>
   </div>
 </div>
@@ -282,12 +284,243 @@
 </nav>
 
 <script>
-  function openEditModal() { document.getElementById('edit-modal').classList.add('show'); }
-  function closeEditModal() { document.getElementById('edit-modal').classList.remove('show'); }
-  function saveEdit() {
-    closeEditModal();
-    showToast('Profil berhasil diperbarui!');
+  // ===== KONFIGURASI API =====
+  // Sesuaikan endpoint di bawah ini (users/me, books/my-loans, users/change-password)
+  // dengan rute yang benar-benar tersedia di backend kamu.
+  const API_BASE_URL = 'http://localhost:5000/api';
+
+  // ===== USER SESSION =====
+  let currentUser = JSON.parse(localStorage.getItem('athenaeum_current_user') || 'null');
+  const token = localStorage.getItem('athenaeum_token');
+
+  function getInitials(name) {
+    if (!name) return '??';
+    return name.split(' ').filter(Boolean).map(w => w[0]).join('').slice(0,2).toUpperCase();
   }
+
+  function formatTanggal(iso) {
+    if (!iso) return '-';
+    const d = new Date(iso);
+    if (isNaN(d)) return iso; // sudah dalam format string siap tampil
+    return d.toLocaleDateString('id-ID', { day:'2-digit', month:'long', year:'numeric' });
+  }
+
+  function formatRupiah(n) {
+    return 'Rp ' + (Number(n) || 0).toLocaleString('id-ID');
+  }
+
+  // Render bagian yang bisa langsung diisi dari data login (tanpa perlu fetch tambahan)
+  function renderFromCurrentUser(user) {
+    if (!user) return;
+    document.getElementById('avatar-initials').textContent = getInitials(user.name);
+    document.getElementById('profile-name').textContent = user.name || '-';
+    document.getElementById('profile-email').textContent = user.email || '-';
+    document.getElementById('info-nama').textContent = user.name || '-';
+    document.getElementById('info-email').textContent = user.email || '-';
+  }
+
+  // Render detail lengkap profil (dari hasil fetch /users/me)
+  function renderProfileDetail(profile) {
+    document.getElementById('info-telepon').textContent = profile.phone || '-';
+    document.getElementById('info-tgl-lahir').textContent = formatTanggal(profile.birthDate);
+    document.getElementById('info-alamat').textContent = profile.address || '-';
+
+    document.getElementById('member-id').textContent = profile.memberId || '-';
+    document.getElementById('member-type').textContent = profile.membershipType || 'Reguler';
+    document.getElementById('member-joined').textContent = formatTanggal(profile.joinedAt);
+    document.getElementById('member-expiry').textContent = formatTanggal(profile.membershipExpiry);
+    document.getElementById('member-max-pinjam').textContent = (profile.maxBorrow ?? '-') + ' buku';
+
+    const badgeWrap = document.getElementById('profile-badges');
+    badgeWrap.innerHTML = '';
+    if (profile.membershipType) {
+      badgeWrap.insertAdjacentHTML('beforeend', `
+        <span class="bg-primary-container text-on-primary-container px-md py-xs rounded-full font-label-sm flex items-center gap-1">
+          <span class="material-symbols-outlined text-[14px]" style="font-variation-settings:'FILL' 1;">verified</span> ${profile.membershipType} Member
+        </span>`);
+    }
+    if (profile.memberId) {
+      badgeWrap.insertAdjacentHTML('beforeend', `<span class="bg-surface-container text-on-surface-variant px-md py-xs rounded-full font-label-sm">ID: ${profile.memberId}</span>`);
+    }
+    if (profile.joinedAt) {
+      const year = new Date(profile.joinedAt).getFullYear();
+      badgeWrap.insertAdjacentHTML('beforeend', `<span class="bg-secondary-container text-on-secondary-container px-md py-xs rounded-full font-label-sm">Aktif sejak ${isNaN(year) ? profile.joinedAt : year}</span>`);
+    }
+  }
+
+  // Simpan referensi profil lengkap agar bisa dipakai saat mengisi form Edit
+  let fullProfile = {};
+
+  async function fetchProfile() {
+    if (!token) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/users/me`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('Gagal memuat profil');
+      const profile = await res.json();
+      fullProfile = profile;
+
+      // Update juga currentUser & localStorage supaya konsisten di halaman lain
+      currentUser = { ...currentUser, ...profile };
+      localStorage.setItem('athenaeum_current_user', JSON.stringify(currentUser));
+
+      renderFromCurrentUser(currentUser);
+      renderProfileDetail(profile);
+    } catch (err) {
+      console.error('Gagal memuat profil:', err);
+      // Fallback: tetap tampilkan apa yang ada dari sesi login saja
+    }
+  }
+
+  async function fetchStats() {
+    if (!token) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/books/my-loans`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('Gagal memuat data pinjaman');
+      const loans = await res.json();
+
+      const now = new Date();
+      let sedangDipinjam = 0;
+      let totalDenda = 0;
+
+      loans.forEach(l => {
+        if (l.status === 'dipinjam' || l.status === 'overdue' || (!l.returnedAt)) {
+          sedangDipinjam++;
+        }
+        const due = new Date(l.dueDate);
+        const diffDays = Math.ceil((due - now) / (1000*60*60*24));
+        if (diffDays < 0 && !l.returnedAt) {
+          totalDenda += Math.abs(diffDays) * 1000;
+        }
+      });
+
+      document.getElementById('stat-total-pinjam').textContent = (fullProfile.totalBorrowed ?? loans.length);
+      document.getElementById('stat-sedang-pinjam').textContent = sedangDipinjam;
+      document.getElementById('stat-denda-aktif').textContent = formatRupiah(totalDenda);
+
+      const maxBorrow = fullProfile.maxBorrow ?? 7;
+      document.getElementById('stat-kuota-sisa').textContent = Math.max(maxBorrow - sedangDipinjam, 0);
+    } catch (err) {
+      console.error('Gagal memuat statistik:', err);
+    }
+  }
+
+  function openEditModal() {
+    // Isi form dengan data user yang sedang login, bukan data statis
+    document.getElementById('edit-nama').value = currentUser?.name || '';
+    document.getElementById('edit-email').value = currentUser?.email || '';
+    document.getElementById('edit-telepon').value = fullProfile.phone || currentUser?.phone || '';
+    const bd = fullProfile.birthDate ? new Date(fullProfile.birthDate) : null;
+    document.getElementById('edit-tgl-lahir').value = bd && !isNaN(bd) ? bd.toISOString().slice(0,10) : '';
+    document.getElementById('edit-alamat').value = fullProfile.address || currentUser?.address || '';
+
+    document.getElementById('edit-modal').classList.add('show');
+  }
+  function closeEditModal() { document.getElementById('edit-modal').classList.remove('show'); }
+
+  async function saveEdit() {
+    const payload = {
+      name: document.getElementById('edit-nama').value.trim(),
+      email: document.getElementById('edit-email').value.trim(),
+      phone: document.getElementById('edit-telepon').value.trim(),
+      birthDate: document.getElementById('edit-tgl-lahir').value,
+      address: document.getElementById('edit-alamat').value.trim(),
+    };
+
+    if (!payload.name || !payload.email) {
+      showToast('Nama dan email wajib diisi');
+      return;
+    }
+
+    const btn = document.getElementById('edit-save-btn');
+    const original = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Menyimpan...';
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/users/me`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Gagal menyimpan profil');
+
+      fullProfile = { ...fullProfile, ...payload };
+      currentUser = { ...currentUser, ...payload };
+      localStorage.setItem('athenaeum_current_user', JSON.stringify(currentUser));
+
+      renderFromCurrentUser(currentUser);
+      renderProfileDetail(fullProfile);
+      closeEditModal();
+      showToast('Profil berhasil diperbarui!');
+    } catch (err) {
+      showToast('❌ ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = original;
+    }
+  }
+
+  async function savePassword() {
+    const oldPw = document.getElementById('pw-old').value;
+    const newPw = document.getElementById('pw-new').value;
+    const confirmPw = document.getElementById('pw-confirm').value;
+
+    if (!oldPw || !newPw || !confirmPw) {
+      showToast('Semua kolom password wajib diisi');
+      return;
+    }
+    if (newPw.length < 8) {
+      showToast('Password baru minimal 8 karakter');
+      return;
+    }
+    if (newPw !== confirmPw) {
+      showToast('Konfirmasi password tidak cocok');
+      return;
+    }
+
+    const btn = document.getElementById('pw-save-btn');
+    const original = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Menyimpan...';
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/users/change-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ oldPassword: oldPw, newPassword: newPw })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Gagal memperbarui password');
+
+      document.getElementById('pw-old').value = '';
+      document.getElementById('pw-new').value = '';
+      document.getElementById('pw-confirm').value = '';
+      showToast('Password berhasil diperbarui!');
+    } catch (err) {
+      showToast('❌ ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = original;
+    }
+  }
+
+  function logoutUser() {
+    localStorage.removeItem('athenaeum_current_user');
+    localStorage.removeItem('athenaeum_token');
+    window.location.href = 'index.html';
+  }
+
   function showToast(msg) {
     const t = document.createElement('div');
     t.style.cssText = 'position:fixed;bottom:88px;left:50%;transform:translateX(-50%);background:#191c1e;color:#eff1f3;padding:10px 20px;border-radius:999px;z-index:99;font-size:14px;display:flex;align-items:center;gap:8px;white-space:nowrap;';
@@ -295,6 +528,11 @@
     document.body.appendChild(t);
     setTimeout(() => t.remove(), 3000);
   }
+
+  // ===== INIT =====
+  renderFromCurrentUser(currentUser);
+  fetchProfile();
+  fetchStats();
 </script>
 </body>
 </html>
